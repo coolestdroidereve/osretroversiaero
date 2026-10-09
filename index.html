@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RetroOS Aero - Frutiger Aero Desktop</title>
+    <!-- Tailwind CSS for fluid layout and utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Vintage Pixel and Monospace Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --ink: #08243f;
+            --edge: #5a86ab;
+            --aqua: #7fe3ff;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Frutiger', 'Open Sans', 'Trebuchet MS', Tahoma, sans-serif;
+            font-size: 12px;
+            color: var(--ink);
+            overflow: hidden;
+            touch-action: manipulation;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        button:focus-visible, input:focus-visible { outline: 2px solid #5cc8ff; outline-offset: 1px; }
+
+        /* ---------- Glass panels ---------- */
+        .aero-panel {
+            background-color: #eaf4fc;
+            background-image: linear-gradient(#f8fcff, #dcebf8);
+        }
+        .win-outset {
+            border: 1px solid rgba(255,255,255,.8);
+            border-radius: 6px;
+            box-shadow: 0 1px 4px rgba(0,50,100,.35), inset 0 0 0 1px rgba(255,255,255,.4);
+        }
+        .win-inset {
+            border: 1px solid #7da2c0;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 3px rgba(0,50,100,.25);
+        }
+        fieldset.win-outset {
+            background: linear-gradient(rgba(255,255,255,.75), rgba(232,245,255,.5));
+            outline: 1px solid rgba(90,140,190,.4);
+        }
+        legend { color: #0b3d6e; font-weight: 700; text-shadow: 0 1px 0 #fff; }
+        .canvas-well { background: linear-gradient(#bcd7ea, #8fb3d0); }
+        .calc-lcd {
+            background: linear-gradient(#e9fdff, #a9ecf7 55%, #8fdcec);
+            box-shadow: inset 0 2px 6px rgba(0,80,120,.35);
+        }
+
+        /* ---------- Windows ---------- */
+        .window {
+            padding: 0 5px 5px;
+            border: 1px solid rgba(255,255,255,.85);
+            border-radius: 9px 9px 5px 5px;
+            background: linear-gradient(160deg, rgba(205,236,255,.82), rgba(120,192,238,.72) 60%, rgba(150,220,205,.70));
+            -webkit-backdrop-filter: blur(12px) saturate(1.5);
+            backdrop-filter: blur(12px) saturate(1.5);
+            box-shadow: 0 0 0 1px rgba(10,50,90,.55), 0 14px 38px rgba(0,40,90,.5), inset 0 1px 0 rgba(255,255,255,.9);
+        }
+        .window::before {
+            content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+            background:
+                linear-gradient(115deg, rgba(255,255,255,.38) 0%, rgba(255,255,255,.08) 34%, rgba(255,255,255,0) 34.2%),
+                radial-gradient(circle at 100% 100%, rgba(120,255,190,.25), transparent 45%);
+        }
+        .window:not(.hidden) { animation: winpop .18s ease-out; }
+        @keyframes winpop { from { opacity: 0; transform: scale(.95); } to { opacity: 1; transform: none; } }
+        .window.inactive {
+            background: linear-gradient(160deg, rgba(228,240,250,.72), rgba(175,208,232,.62));
+            box-shadow: 0 0 0 1px rgba(60,90,120,.45), 0 6px 20px rgba(0,40,90,.3), inset 0 1px 0 rgba(255,255,255,.7);
+        }
+        .window.inactive > .win-titlebar { opacity: .72; filter: saturate(.45); }
+
+        .win-titlebar {
+            background: linear-gradient(rgba(255,255,255,.7), rgba(195,228,250,.45) 48%, rgba(120,190,235,.38) 52%, rgba(195,238,252,.55)) !important;
+            color: #08243f !important;
+            text-shadow: 0 0 7px #fff, 0 0 3px #fff, 0 0 12px rgba(255,255,255,.8);
+            border: 1px solid rgba(255,255,255,.75);
+            border-bottom-color: rgba(60,120,180,.35);
+            border-radius: 6px 6px 0 0;
+            padding: 4px 8px !important;
+        }
+        .window > .win-titlebar { margin: 0 -5px 4px; border-radius: 8px 8px 0 0; }
+        .win-titlebar button {
+            background: linear-gradient(#fff 0%, #d4ecff 45%, #8cc9f2 52%, #c4ecff 100%);
+            color: #0b2a4a;
+            border: 1px solid rgba(20,70,120,.7);
+            border-radius: 3px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.7);
+            height: 20px; min-width: 26px; padding: 0 6px; line-height: 1; text-shadow: none;
+        }
+        .win-titlebar button:hover { box-shadow: inset 0 0 0 1px #fff, 0 0 8px rgba(90,210,255,.95); }
+        .win-titlebar button:last-child {
+            background: linear-gradient(#fbbcb2 0%, #e5513f 48%, #c01b0c 52%, #ec6a52 100%);
+            color: #fff; text-shadow: 0 1px 1px #5a0a00; min-width: 34px; border-color: rgba(90,0,0,.75);
+        }
+        .win-titlebar button:last-child:hover { box-shadow: inset 0 0 0 1px #ffd0c8, 0 0 9px rgba(255,90,70,.95); }
+
+        /* ---------- Buttons ---------- */
+        .btn-retro {
+            background-color: #e6f3fc;
+            background-image: linear-gradient(rgba(255,255,255,.95) 0%, rgba(255,255,255,.55) 49%, rgba(255,255,255,0) 50%, rgba(150,210,245,.45) 100%);
+            border: 1px solid var(--edge);
+            border-radius: 4px;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.8), 0 1px 2px rgba(0,50,100,.25);
+            color: var(--ink);
+            cursor: pointer;
+            transition: box-shadow .15s, filter .15s;
+        }
+        .btn-retro:hover {
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.9), 0 0 0 1px #6ec3ee, 0 0 9px rgba(80,200,255,.85);
+            filter: brightness(1.05);
+        }
+        .btn-retro:active, .btn-retro.active {
+            background-image: linear-gradient(rgba(110,175,225,.55), rgba(190,225,250,.5) 50%, rgba(150,210,245,.45) 51%, rgba(210,240,255,.6));
+            box-shadow: inset 0 2px 5px rgba(0,60,120,.45);
+        }
+        .aero-hover { border-radius: 3px; }
+        .aero-hover:hover {
+            background: linear-gradient(#f0faff, #bfe6fb);
+            color: #02223d;
+            box-shadow: inset 0 0 0 1px #7fc1ec;
+        }
+        #palette .win-inset { border-radius: 2px; }
+
+        /* ---------- Taskbar / Start ---------- */
+        #taskbar {
+            height: 40px; border-radius: 0; border: none; padding: 0 6px;
+            border-top: 1px solid rgba(255,255,255,.75);
+            background: linear-gradient(rgba(150,200,240,.6) 0%, rgba(50,105,170,.82) 48%, rgba(12,45,100,.92) 52%, rgba(25,80,145,.94) 100%);
+            -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+            box-shadow: 0 -2px 14px rgba(0,40,90,.4), inset 0 1px 0 rgba(255,255,255,.5);
+        }
+        .tb-sep { width: 2px; height: 24px; margin: 0 4px; flex: none;
+            background: linear-gradient(rgba(255,255,255,0), rgba(255,255,255,.7), rgba(255,255,255,0)); }
+        #start-btn {
+            position: relative; overflow: hidden; flex: none;
+            width: 36px; height: 36px; padding: 0; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            border: 2px solid rgba(255,255,255,.85);
+            background: radial-gradient(circle at 35% 25%, #c4f3ff 0, #4cc3f5 30%, #1670c9 70%, #0b3f8f 100%);
+            box-shadow: 0 0 9px rgba(120,225,255,.95), inset 0 -4px 8px rgba(0,40,120,.6), 0 1px 3px #000;
+            transition: filter .15s;
+        }
+        #start-btn::after {
+            content: ""; position: absolute; left: 12%; right: 12%; top: 3%; height: 46%; border-radius: 50%;
+            background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.05)); pointer-events: none;
+        }
+        #start-btn svg { position: relative; z-index: 1; }
+        #start-btn:hover { filter: brightness(1.18); }
+        #start-btn:active { filter: brightness(.9); }
+        #taskbar-apps .btn-retro {
+            height: 30px; color: #fff; text-shadow: 0 1px 1px rgba(0,30,70,.85);
+            border: 1px solid rgba(255,255,255,.55); border-radius: 4px;
+            background: linear-gradient(rgba(255,255,255,.38), rgba(255,255,255,.1) 50%, rgba(255,255,255,.02) 51%, rgba(160,220,255,.28)) !important;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.15);
+        }
+        #taskbar-apps .btn-retro:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), 0 0 9px rgba(130,225,255,.9); }
+        #taskbar-apps .btn-retro.active {
+            border-color: #fff;
+            background: linear-gradient(rgba(255,255,255,.6), rgba(160,225,255,.38) 50%, rgba(80,170,230,.3) 51%, rgba(190,240,255,.5)) !important;
+            box-shadow: 0 0 9px rgba(130,225,255,.9), inset 0 0 8px rgba(255,255,255,.5);
+        }
+        #taskbar > .win-inset {
+            height: 28px; color: #fff; text-shadow: 0 1px 1px rgba(0,30,70,.8);
+            background: linear-gradient(rgba(255,255,255,.28), rgba(255,255,255,.06));
+            border: 1px solid rgba(255,255,255,.45); border-radius: 5px;
+            box-shadow: inset 0 0 6px rgba(255,255,255,.25);
+        }
+        #start-menu {
+            background: linear-gradient(rgba(246,252,255,.9), rgba(205,230,250,.88));
+            -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,.9); border-radius: 8px 8px 0 0;
+            box-shadow: 0 0 0 1px rgba(10,50,90,.5), 0 -6px 30px rgba(0,40,90,.5);
+            animation: winpop .16s ease-out;
+        }
+        #start-menu > div > div:first-child {
+            background: linear-gradient(to top, #0a4fa8, #3fb4f0 70%, #8fdcff) !important;
+            border-radius: 7px 0 0 0;
+        }
+
+        /* ---------- Desktop icons ---------- */
+        .shortcut-icon { border: 1px solid transparent; border-radius: 5px; transition: background .15s, box-shadow .15s; }
+        .shortcut-icon svg { filter: drop-shadow(0 3px 3px rgba(0,40,90,.55)); }
+        .shortcut-icon:hover {
+            background: linear-gradient(rgba(255,255,255,.42), rgba(255,255,255,.12));
+            border-color: rgba(255,255,255,.7);
+            box-shadow: 0 0 12px rgba(255,255,255,.4);
+        }
+        .icon-label { color: #fff; border-radius: 3px; padding: 1px 4px;
+            text-shadow: 0 1px 2px rgba(0,30,70,.95), 0 0 6px rgba(0,40,90,.75); }
+
+        /* ---------- App-specific polish ---------- */
+        #terminal-body { background: linear-gradient(rgba(4,18,36,.93), rgba(2,10,24,.95)) !important; border-radius: 4px; }
+        #win-browser .bg-black { background: radial-gradient(circle at 35% 30%, #fff, #7fd0ff 45%, #1a73c7) !important; }
+        #minesweeper-grid .btn-retro { border-radius: 3px; background-color: #9fd6f7; }
+        #minesweeper-grid .win-inset { background: #eef7fd !important; border-radius: 3px; box-shadow: inset 0 1px 2px rgba(0,60,110,.3); }
+        #mine-count-display, #mine-timer-display { border-radius: 4px; box-shadow: inset 0 0 6px #300; border-color: #345 !important; }
+        #cpu-bar { background: linear-gradient(#a3ecff, #1b86d8 50%, #0f6bbd 51%, #47b6f0) !important; }
+        #ram-bar { background: linear-gradient(#c6f98f, #3fbf3a 50%, #2a9a2a 51%, #6fdc5a) !important; }
+        #shutdown-modal, #about-modal { -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); background: rgba(0,30,70,.35) !important; }
+        [class*="border-gray-"] { border-color: rgba(70,120,170,.35) !important; }
+
+        /* ---------- Wallpapers (inspired by the Frutiger Aero Archive categories) ---------- */
+        .wp-meadow {
+            background-color: #3aa0ea;
+            background-image:
+                url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%201600%20500%27%20preserveAspectRatio%3D%27none%27%3E%0A%3Cdefs%3E%0A%3ClinearGradient%20id%3D%27a%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23a8ec52%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%232c9a2c%27%2F%3E%3C%2FlinearGradient%3E%0A%3ClinearGradient%20id%3D%27b%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%237fd65a%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%231d7f33%27%2F%3E%3C%2FlinearGradient%3E%0A%3ClinearGradient%20id%3D%27c%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%236fd6b0%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%232a8f7a%27%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%0A%3Cpath%20d%3D%27M0%20170%20C220%2090%20480%20110%20760%20170%20S1260%20210%201600%20110%20V500%20H0Z%27%20fill%3D%27url%28%23c%29%27%20opacity%3D%27.75%27%2F%3E%0A%3Cpath%20d%3D%27M0%20250%20C260%20150%20560%20200%20880%20250%20S1380%20300%201600%20200%20V500%20H0Z%27%20fill%3D%27url%28%23b%29%27%2F%3E%0A%3Cpath%20d%3D%27M0%20340%20C300%20270%20620%20330%20940%20350%20S1400%20380%201600%20310%20V500%20H0Z%27%20fill%3D%27url%28%23a%29%27%2F%3E%0A%3Cg%20fill%3D%27%23fff%27%20opacity%3D%27.9%27%3E%0A%3Ccircle%20cx%3D%27180%27%20cy%3D%27410%27%20r%3D%274%27%2F%3E%3Ccircle%20cx%3D%27260%27%20cy%3D%27440%27%20r%3D%273%27%2F%3E%3Ccircle%20cx%3D%27520%27%20cy%3D%27400%27%20r%3D%274%27%2F%3E%0A%3Ccircle%20cx%3D%27760%27%20cy%3D%27430%27%20r%3D%273%27%2F%3E%3Ccircle%20cx%3D%271010%27%20cy%3D%27410%27%20r%3D%274%27%2F%3E%3Ccircle%20cx%3D%271240%27%20cy%3D%27440%27%20r%3D%273%27%2F%3E%3Ccircle%20cx%3D%271460%27%20cy%3D%27390%27%20r%3D%274%27%2F%3E%0A%3C%2Fg%3E%0A%3Cg%20fill%3D%27%23ffd84a%27%3E%0A%3Ccircle%20cx%3D%27180%27%20cy%3D%27410%27%20r%3D%271.6%27%2F%3E%3Ccircle%20cx%3D%27520%27%20cy%3D%27400%27%20r%3D%271.6%27%2F%3E%3Ccircle%20cx%3D%271010%27%20cy%3D%27410%27%20r%3D%271.6%27%2F%3E%3Ccircle%20cx%3D%271460%27%20cy%3D%27390%27%20r%3D%271.6%27%2F%3E%0A%3C%2Fg%3E%0A%3C%2Fsvg%3E"),
+                radial-gradient(ellipse 22% 9% at 24% 20%, rgba(255,255,255,.85), rgba(255,255,255,0) 70%),
+                radial-gradient(ellipse 18% 8% at 31% 23%, rgba(255,255,255,.8), rgba(255,255,255,0) 70%),
+                radial-gradient(ellipse 26% 10% at 72% 14%, rgba(255,255,255,.8), rgba(255,255,255,0) 70%),
+                radial-gradient(ellipse 18% 7% at 63% 28%, rgba(255,255,255,.7), rgba(255,255,255,0) 70%),
+                radial-gradient(ellipse 14% 6% at 90% 34%, rgba(255,255,255,.65), rgba(255,255,255,0) 70%),
+                radial-gradient(circle at 82% 11%, rgba(255,255,230,.95) 0, rgba(255,255,200,.45) 4%, rgba(255,255,255,0) 22%),
+                linear-gradient(180deg, #1673d3 0%, #3da6ee 40%, #9ddcff 68%, #e3f6ff 82%);
+            background-repeat: no-repeat;
+            background-position: bottom center, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+            background-size: 100% 48%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+        }
+        .wp-aero {
+            background-color: #06305e;
+            background-image:
+                url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%201600%20900%27%20preserveAspectRatio%3D%27xMidYMid%20slice%27%3E%0A%3Cdefs%3E%0A%3ClinearGradient%20id%3D%27r%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%270%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%27.5%27%20stop-color%3D%27%23b6fbff%27%20stop-opacity%3D%27.6%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%270%27%2F%3E%3C%2FlinearGradient%3E%0A%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%270%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%237dffb2%27%20stop-opacity%3D%270%27%2F%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%237dffb2%27%20stop-opacity%3D%27.5%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%235ee0ff%27%20stop-opacity%3D%270%27%2F%3E%3C%2FlinearGradient%3E%0A%3C%2Fdefs%3E%0A%3Cpath%20d%3D%27M-100%20720%20C300%20420%20700%20900%201100%20520%20S1500%20300%201700%20380%20L1700%20470%20C1500%20410%201200%20660%20900%20780%20S300%20580%20-100%20830Z%27%20fill%3D%27url%28%23r%29%27%2F%3E%0A%3Cpath%20d%3D%27M-100%20600%20C250%20330%20640%20700%201000%20430%20S1450%20200%201700%20260%20L1700%20300%20C1450%20250%201150%20520%20880%20620%20S320%20450%20-100%20660Z%27%20fill%3D%27url%28%23g%29%27%2F%3E%0A%3Cpath%20d%3D%27M-100%20820%20C350%20620%20800%20880%201250%20640%20S1550%20560%201700%20600%20L1700%20640%20C1500%20610%201300%20720%201000%20840%20S400%20700%20-100%20880Z%27%20fill%3D%27url%28%23r%29%27%20opacity%3D%27.7%27%2F%3E%0A%3Cg%20fill%3D%27%23fff%27%3E%3Ccircle%20cx%3D%271180%27%20cy%3D%27160%27%20r%3D%273%27%20opacity%3D%27.8%27%2F%3E%3Ccircle%20cx%3D%271320%27%20cy%3D%27110%27%20r%3D%272%27%20opacity%3D%27.7%27%2F%3E%3Ccircle%20cx%3D%27980%27%20cy%3D%2790%27%20r%3D%272.5%27%20opacity%3D%27.6%27%2F%3E%3Ccircle%20cx%3D%271450%27%20cy%3D%27230%27%20r%3D%272%27%20opacity%3D%27.6%27%2F%3E%3C%2Fg%3E%0A%3C%2Fsvg%3E"),
+                radial-gradient(circle at 12% 95%, rgba(80,255,170,.55), transparent 40%),
+                radial-gradient(circle at 85% 8%, rgba(190,245,255,.65), transparent 35%),
+                radial-gradient(circle at 50% 50%, rgba(40,150,230,.45), transparent 60%),
+                linear-gradient(135deg, #041b45, #0b4f9a 40%, #14a3d6 70%, #3be0b5);
+            background-repeat: no-repeat;
+            background-position: center, 0 0, 0 0, 0 0, 0 0;
+            background-size: cover, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+        }
+        .wp-ocean {
+            background-color: #0a78c2;
+            background-image:
+                radial-gradient(ellipse 80% 12% at 50% -2%, rgba(255,255,255,.85), rgba(255,255,255,0) 70%),
+                url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20700%20700%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27b%27%20cx%3D%27.35%27%20cy%3D%27.3%27%20r%3D%27.75%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%27.9%27%2F%3E%3Cstop%20offset%3D%27.25%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%27.35%27%2F%3E%3Cstop%20offset%3D%27.7%27%20stop-color%3D%27%239fe3ff%27%20stop-opacity%3D%27.12%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%27.65%27%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23b%29%27%20stroke%3D%27%23fff%27%20stroke-opacity%3D%27.6%27%20stroke-width%3D%271.5%27%3E%3Ccircle%20cx%3D%2790%27%20cy%3D%27120%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%2770%27%20r%3D%2728%27%2F%3E%3Ccircle%20cx%3D%27480%27%20cy%3D%27180%27%20r%3D%2780%27%2F%3E%3Ccircle%20cx%3D%27620%27%20cy%3D%2760%27%20r%3D%2736%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%27330%27%20r%3D%2734%27%2F%3E%3Ccircle%20cx%3D%27380%27%20cy%3D%27360%27%20r%3D%2752%27%2F%3E%3Ccircle%20cx%3D%27560%27%20cy%3D%27400%27%20r%3D%2722%27%2F%3E%3Ccircle%20cx%3D%2790%27%20cy%3D%27520%27%20r%3D%2770%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27560%27%20r%3D%2740%27%2F%3E%3Ccircle%20cx%3D%27500%27%20cy%3D%27590%27%20r%3D%2764%27%2F%3E%3Ccircle%20cx%3D%27650%27%20cy%3D%27300%27%20r%3D%2726%27%2F%3E%3Ccircle%20cx%3D%27230%27%20cy%3D%27210%27%20r%3D%2716%27%2F%3E%3Ccircle%20cx%3D%27420%27%20cy%3D%2740%27%20r%3D%2714%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+                repeating-conic-gradient(from 165deg at 35% -5%, rgba(255,255,255,.14) 0deg 3deg, rgba(255,255,255,0) 3deg 9deg),
+                linear-gradient(to top, rgba(255,235,170,.35), rgba(255,235,170,0) 14%),
+                linear-gradient(180deg, #bff0ff 0%, #36b6ec 18%, #0a78c2 55%, #04316a 100%);
+            background-repeat: no-repeat, repeat, no-repeat, no-repeat, no-repeat;
+            background-size: 100% 100%, 520px 520px, 100% 100%, 100% 100%, 100% 100%;
+        }
+        .wp-city {
+            background-color: #52b9f5;
+            background-image:
+                url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%201600%20600%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27tw%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23f4fcff%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%236fb9e8%27%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%27orb%27%20cx%3D%27.35%27%20cy%3D%27.3%27%20r%3D%27.8%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23fff%27%2F%3E%3Cstop%20offset%3D%27.5%27%20stop-color%3D%27%237fdcff%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%231a78c8%27%2F%3E%3C%2FradialGradient%3E%3ClinearGradient%20id%3D%27gr%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%239be34a%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%232c9a2c%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cellipse%20cx%3D%271120%27%20cy%3D%27230%27%20rx%3D%27300%27%20ry%3D%2762%27%20fill%3D%27none%27%20stroke%3D%27%23fff%27%20stroke-opacity%3D%27.75%27%20stroke-width%3D%276%27%20transform%3D%27rotate%28-16%201120%20230%29%27%2F%3E%3Crect%20x%3D%27-20%27%20y%3D%27209%27%20width%3D%2773%27%20height%3D%27401%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27-20%27%20y%3D%27209%27%20width%3D%2721%27%20height%3D%27401%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%27219%27%20width%3D%2730%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%27249%27%20width%3D%2730%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%27279%27%20width%3D%2730%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%27309%27%20width%3D%2730%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%27339%27%20width%3D%2730%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%27369%27%20width%3D%2730%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%2712%27%20y%3D%27399%27%20width%3D%2730%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%2762%27%20y%3D%27311%27%20width%3D%2794%27%20height%3D%27299%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%2762%27%20y%3D%27311%27%20width%3D%2728%27%20height%3D%27299%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27104%27%20y%3D%27321%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27104%27%20y%3D%27351%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27104%27%20y%3D%27381%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27104%27%20y%3D%27411%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27104%27%20y%3D%27441%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27104%27%20y%3D%27471%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27162%27%20y%3D%27212%27%20width%3D%2777%27%20height%3D%27398%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27162%27%20y%3D%27212%27%20width%3D%2723%27%20height%3D%27398%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%27222%27%20width%3D%2732%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%27252%27%20width%3D%2732%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%27282%27%20width%3D%2732%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%27312%27%20width%3D%2732%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%27342%27%20width%3D%2732%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%27372%27%20width%3D%2732%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27196%27%20y%3D%27402%27%20width%3D%2732%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27249%27%20y%3D%27383%27%20width%3D%2757%27%20height%3D%27227%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27249%27%20y%3D%27383%27%20width%3D%2717%27%20height%3D%27227%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27274%27%20y%3D%27393%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27274%27%20y%3D%27423%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27274%27%20y%3D%27453%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27274%27%20y%3D%27483%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27314%27%20y%3D%27269%27%20width%3D%2775%27%20height%3D%27341%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27314%27%20y%3D%27269%27%20width%3D%2722%27%20height%3D%27341%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27347%27%20y%3D%27279%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27347%27%20y%3D%27309%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27347%27%20y%3D%27339%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27347%27%20y%3D%27369%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27347%27%20y%3D%27399%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27347%27%20y%3D%27429%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27347%27%20y%3D%27459%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27386%27%20y%3D%27316%27%20width%3D%2751%27%20height%3D%27294%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27386%27%20y%3D%27316%27%20width%3D%2715%27%20height%3D%27294%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27408%27%20y%3D%27326%27%20width%3D%2721%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27408%27%20y%3D%27356%27%20width%3D%2721%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27408%27%20y%3D%27386%27%20width%3D%2721%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27408%27%20y%3D%27416%27%20width%3D%2721%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27408%27%20y%3D%27446%27%20width%3D%2721%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27408%27%20y%3D%27476%27%20width%3D%2721%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27438%27%20y%3D%27407%27%20width%3D%2754%27%20height%3D%27203%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27438%27%20y%3D%27407%27%20width%3D%2716%27%20height%3D%27203%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27462%27%20y%3D%27417%27%20width%3D%2722%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27462%27%20y%3D%27447%27%20width%3D%2722%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27462%27%20y%3D%27477%27%20width%3D%2722%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27501%27%20y%3D%27268%27%20width%3D%2789%27%20height%3D%27342%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27501%27%20y%3D%27268%27%20width%3D%2726%27%20height%3D%27342%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27541%27%20y%3D%27278%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27541%27%20y%3D%27308%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27541%27%20y%3D%27338%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27541%27%20y%3D%27368%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27541%27%20y%3D%27398%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27541%27%20y%3D%27428%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27541%27%20y%3D%27458%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27583%27%20y%3D%27329%27%20width%3D%2783%27%20height%3D%27281%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27583%27%20y%3D%27329%27%20width%3D%2724%27%20height%3D%27281%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27620%27%20y%3D%27339%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27620%27%20y%3D%27369%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27620%27%20y%3D%27399%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27620%27%20y%3D%27429%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27620%27%20y%3D%27459%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27620%27%20y%3D%27489%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27672%27%20y%3D%27241%27%20width%3D%2786%27%20height%3D%27369%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27672%27%20y%3D%27241%27%20width%3D%2725%27%20height%3D%27369%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27710%27%20y%3D%27251%27%20width%3D%2736%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27710%27%20y%3D%27281%27%20width%3D%2736%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27710%27%20y%3D%27311%27%20width%3D%2736%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27710%27%20y%3D%27341%27%20width%3D%2736%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27710%27%20y%3D%27371%27%20width%3D%2736%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27710%27%20y%3D%27401%27%20width%3D%2736%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27710%27%20y%3D%27431%27%20width%3D%2736%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27755%27%20y%3D%27427%27%20width%3D%2784%27%20height%3D%27183%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27755%27%20y%3D%27427%27%20width%3D%2725%27%20height%3D%27183%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27792%27%20y%3D%27437%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27792%27%20y%3D%27467%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27792%27%20y%3D%27497%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27847%27%20y%3D%27415%27%20width%3D%2749%27%20height%3D%27195%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27847%27%20y%3D%27415%27%20width%3D%2714%27%20height%3D%27195%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27869%27%20y%3D%27425%27%20width%3D%2720%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27869%27%20y%3D%27455%27%20width%3D%2720%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27869%27%20y%3D%27485%27%20width%3D%2720%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27889%27%20y%3D%27205%27%20width%3D%2757%27%20height%3D%27405%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27889%27%20y%3D%27205%27%20width%3D%2717%27%20height%3D%27405%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27914%27%20y%3D%27215%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27914%27%20y%3D%27245%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27914%27%20y%3D%27275%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27914%27%20y%3D%27305%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27914%27%20y%3D%27335%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27914%27%20y%3D%27365%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27914%27%20y%3D%27395%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27945%27%20y%3D%27423%27%20width%3D%2783%27%20height%3D%27187%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27945%27%20y%3D%27423%27%20width%3D%2724%27%20height%3D%27187%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%27982%27%20y%3D%27433%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27982%27%20y%3D%27463%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%27982%27%20y%3D%27493%27%20width%3D%2734%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271034%27%20y%3D%27318%27%20width%3D%2765%27%20height%3D%27292%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271034%27%20y%3D%27318%27%20width%3D%2719%27%20height%3D%27292%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271063%27%20y%3D%27328%27%20width%3D%2727%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271063%27%20y%3D%27358%27%20width%3D%2727%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271063%27%20y%3D%27388%27%20width%3D%2727%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271063%27%20y%3D%27418%27%20width%3D%2727%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271063%27%20y%3D%27448%27%20width%3D%2727%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271063%27%20y%3D%27478%27%20width%3D%2727%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271109%27%20y%3D%27298%27%20width%3D%2757%27%20height%3D%27312%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271109%27%20y%3D%27298%27%20width%3D%2717%27%20height%3D%27312%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271134%27%20y%3D%27308%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271134%27%20y%3D%27338%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271134%27%20y%3D%27368%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271134%27%20y%3D%27398%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271134%27%20y%3D%27428%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271134%27%20y%3D%27458%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271134%27%20y%3D%27488%27%20width%3D%2723%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271165%27%20y%3D%27355%27%20width%3D%2785%27%20height%3D%27255%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271165%27%20y%3D%27355%27%20width%3D%2725%27%20height%3D%27255%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271203%27%20y%3D%27365%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271203%27%20y%3D%27395%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271203%27%20y%3D%27425%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271203%27%20y%3D%27455%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271203%27%20y%3D%27485%27%20width%3D%2735%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271257%27%20y%3D%27261%27%20width%3D%2745%27%20height%3D%27349%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271257%27%20y%3D%27261%27%20width%3D%2713%27%20height%3D%27349%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271277%27%20y%3D%27271%27%20width%3D%2718%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271277%27%20y%3D%27301%27%20width%3D%2718%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271277%27%20y%3D%27331%27%20width%3D%2718%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271277%27%20y%3D%27361%27%20width%3D%2718%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271277%27%20y%3D%27391%27%20width%3D%2718%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271277%27%20y%3D%27421%27%20width%3D%2718%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271277%27%20y%3D%27451%27%20width%3D%2718%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271296%27%20y%3D%27263%27%20width%3D%2774%27%20height%3D%27347%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271296%27%20y%3D%27263%27%20width%3D%2722%27%20height%3D%27347%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271329%27%20y%3D%27273%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271329%27%20y%3D%27303%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271329%27%20y%3D%27333%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271329%27%20y%3D%27363%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271329%27%20y%3D%27393%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271329%27%20y%3D%27423%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271329%27%20y%3D%27453%27%20width%3D%2731%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271370%27%20y%3D%27289%27%20width%3D%2771%27%20height%3D%27321%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271370%27%20y%3D%27289%27%20width%3D%2721%27%20height%3D%27321%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271401%27%20y%3D%27299%27%20width%3D%2729%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271401%27%20y%3D%27329%27%20width%3D%2729%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271401%27%20y%3D%27359%27%20width%3D%2729%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271401%27%20y%3D%27389%27%20width%3D%2729%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271401%27%20y%3D%27419%27%20width%3D%2729%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271401%27%20y%3D%27449%27%20width%3D%2729%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271401%27%20y%3D%27479%27%20width%3D%2729%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271435%27%20y%3D%27365%27%20width%3D%2790%27%20height%3D%27245%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271435%27%20y%3D%27365%27%20width%3D%2727%27%20height%3D%27245%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271475%27%20y%3D%27375%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271475%27%20y%3D%27405%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271475%27%20y%3D%27435%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271475%27%20y%3D%27465%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271475%27%20y%3D%27495%27%20width%3D%2737%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271527%27%20y%3D%27372%27%20width%3D%2793%27%20height%3D%27238%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271527%27%20y%3D%27372%27%20width%3D%2727%27%20height%3D%27238%27%20fill%3D%27%23fff%27%20opacity%3D%27.4%27%2F%3E%3Crect%20x%3D%271568%27%20y%3D%27382%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271568%27%20y%3D%27412%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271568%27%20y%3D%27442%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Crect%20x%3D%271568%27%20y%3D%27472%27%20width%3D%2739%27%20height%3D%273%27%20fill%3D%27%23fff%27%20opacity%3D%27.6%27%2F%3E%3Cpolygon%20points%3D%27770%2C545%20796%2C130%20804%2C130%20830%2C545%27%20fill%3D%27url%28%23tw%29%27%20stroke%3D%27%234c9bd0%27%20stroke-opacity%3D%27.5%27%2F%3E%3Ccircle%20cx%3D%27800%27%20cy%3D%27255%27%20r%3D%2730%27%20fill%3D%27url%28%23orb%29%27%20stroke%3D%27%232a7fc0%27%2F%3E%3Cline%20x1%3D%27800%27%20y1%3D%27130%27%20x2%3D%27800%27%20y2%3D%2770%27%20stroke%3D%27%23fff%27%20stroke-width%3D%273%27%2F%3E%3Ccircle%20cx%3D%27800%27%20cy%3D%2766%27%20r%3D%275%27%20fill%3D%27%23fff%27%2F%3E%3Cpath%20d%3D%27M0%20560%20C400%20520%201100%20545%201600%20505%20V600%20H0Z%27%20fill%3D%27url%28%23gr%29%27%2F%3E%3C%2Fsvg%3E"),
+                radial-gradient(ellipse 18% 8% at 22% 22%, rgba(255,255,255,.8), rgba(255,255,255,0) 70%),
+                radial-gradient(ellipse 22% 9% at 68% 16%, rgba(255,255,255,.8), rgba(255,255,255,0) 70%),
+                radial-gradient(circle at 85% 12%, rgba(255,255,230,.9) 0, rgba(255,255,200,.4) 4%, rgba(255,255,255,0) 20%),
+                linear-gradient(#0b6fd1, #52b9f5 50%, #d6f3ff 85%, #fff);
+            background-repeat: no-repeat;
+            background-position: bottom center, 0 0, 0 0, 0 0, 0 0;
+            background-size: 100% 62%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+        }
+        .wp-bubbles {
+            background-color: #7fd4f5;
+            background-image:
+                url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20700%20700%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27b%27%20cx%3D%27.35%27%20cy%3D%27.3%27%20r%3D%27.75%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%27.9%27%2F%3E%3Cstop%20offset%3D%27.25%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%27.35%27%2F%3E%3Cstop%20offset%3D%27.7%27%20stop-color%3D%27%239fe3ff%27%20stop-opacity%3D%27.12%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23fff%27%20stop-opacity%3D%27.65%27%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Cg%20fill%3D%27url%28%23b%29%27%20stroke%3D%27%23fff%27%20stroke-opacity%3D%27.6%27%20stroke-width%3D%271.5%27%3E%3Ccircle%20cx%3D%2790%27%20cy%3D%27120%27%20r%3D%2760%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%2770%27%20r%3D%2728%27%2F%3E%3Ccircle%20cx%3D%27480%27%20cy%3D%27180%27%20r%3D%2780%27%2F%3E%3Ccircle%20cx%3D%27620%27%20cy%3D%2760%27%20r%3D%2736%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%27330%27%20r%3D%2734%27%2F%3E%3Ccircle%20cx%3D%27380%27%20cy%3D%27360%27%20r%3D%2752%27%2F%3E%3Ccircle%20cx%3D%27560%27%20cy%3D%27400%27%20r%3D%2722%27%2F%3E%3Ccircle%20cx%3D%2790%27%20cy%3D%27520%27%20r%3D%2770%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27560%27%20r%3D%2740%27%2F%3E%3Ccircle%20cx%3D%27500%27%20cy%3D%27590%27%20r%3D%2764%27%2F%3E%3Ccircle%20cx%3D%27650%27%20cy%3D%27300%27%20r%3D%2726%27%2F%3E%3Ccircle%20cx%3D%27230%27%20cy%3D%27210%27%20r%3D%2716%27%2F%3E%3Ccircle%20cx%3D%27420%27%20cy%3D%2740%27%20r%3D%2714%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),
+                radial-gradient(circle at 20% 15%, rgba(255,255,255,.7), transparent 35%),
+                radial-gradient(circle at 85% 90%, rgba(120,255,200,.4), transparent 40%),
+                linear-gradient(160deg, #d8f6ff, #7fd4f5 40%, #35a8e0);
+            background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+            background-size: 700px 700px, 100% 100%, 100% 100%, 100% 100%;
+        }
+
+        /* ---------- Glass shine + floating bubbles (settings toggle) ---------- */
+        .crt-screen::before {
+            content: ""; position: absolute; inset: 0; z-index: 9999; pointer-events: none;
+            background:
+                radial-gradient(circle at 10% 6%, rgba(255,255,235,.4) 0, rgba(255,255,255,.1) 7%, rgba(255,255,255,0) 22%),
+                linear-gradient(118deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.04) 38%, rgba(255,255,255,0) 38.2%);
+        }
+        #bubble-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+        body:not(.crt-screen) #bubble-layer { display: none; }
+        .bubble {
+            position: absolute; bottom: -120px; border-radius: 50%;
+            background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.95) 0, rgba(255,255,255,.55) 8%, rgba(255,255,255,.12) 30%, rgba(120,200,255,.18) 70%, rgba(255,255,255,.55) 100%);
+            border: 1px solid rgba(255,255,255,.6);
+            box-shadow: inset 0 -6px 12px rgba(120,220,255,.35), 0 0 12px rgba(255,255,255,.25);
+            animation: rise var(--d, 20s) linear var(--delay, 0s) infinite;
+        }
+        @keyframes rise {
+            0%   { transform: translate(0, 0) scale(.8); opacity: 0; }
+            10%  { opacity: .9; }
+            50%  { transform: translate(var(--sway, 30px), -55vh); }
+            100% { transform: translate(calc(var(--sway, 30px) * -1), -120vh) scale(1.05); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) { .bubble { animation: none; opacity: .4; bottom: 20%; } .window:not(.hidden) { animation: none; } }
+
+        /* ---------- Scrollbars ---------- */
+        ::-webkit-scrollbar { width: 16px; height: 16px; background: linear-gradient(90deg, #e8f2fa, #fff); }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, #f4fbff, #bfe2f8 50%, #9ad0f2);
+            border: 1px solid #6a98bd; border-radius: 3px;
+        }
+        ::-webkit-scrollbar-button {
+            background: linear-gradient(#f4fbff, #bfe2f8);
+            border: 1px solid #6a98bd; border-radius: 3px; width: 16px; height: 16px;
+        }
+
+        .pixel-font { font-family: 'VT323', monospace; }
+        .terminal-font { font-family: 'Share Tech Mono', monospace; }
+
+        /* ---------- Music player ---------- */
+        .music-art {
+            position: relative; aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; flex: none;
+            border: 1px solid #6a98bd;
+            background: radial-gradient(circle at 30% 25%, #c4f3ff, #4cc3f5 40%, #1670c9 80%);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.5), 0 2px 8px rgba(0,50,100,.35);
+        }
+        .music-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .music-art::after {
+            content: ""; position: absolute; inset: 0; pointer-events: none;
+            background: linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,0) 45%);
+        }
+        .music-note { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            font-size: 44px; color: rgba(255,255,255,.85); text-shadow: 0 2px 8px rgba(0,60,120,.6); }
+        .eq { position: absolute; right: 8px; bottom: 8px; display: flex; gap: 2px; align-items: flex-end; height: 18px; z-index: 2; }
+        .eq i { display: block; width: 3px; height: 4px; background: #fff; border-radius: 1px; box-shadow: 0 0 4px #7fe7ff; }
+        .music-art.playing .eq i { animation: eqbar .9s ease-in-out infinite; }
+        .eq i:nth-child(2) { animation-delay: -.3s; }
+        .eq i:nth-child(3) { animation-delay: -.6s; }
+        .eq i:nth-child(4) { animation-delay: -.15s; }
+        @keyframes eqbar { 0%, 100% { height: 4px; } 50% { height: 18px; } }
+
+        input[type=range].aero-range { -webkit-appearance: none; appearance: none; width: 100%; height: 16px; background: transparent; cursor: pointer; margin: 0; }
+        input[type=range].aero-range::-webkit-slider-runnable-track {
+            height: 6px; border-radius: 3px; border: 1px solid #6a98bd;
+            background: linear-gradient(#9cc3de, #e3f3fc); box-shadow: inset 0 1px 2px rgba(0,50,100,.4);
+        }
+        input[type=range].aero-range::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%;
+            border: 1px solid #1d5f9a;
+            background: radial-gradient(circle at 35% 30%, #fff, #7fd3f7 55%, #2b8fdc);
+            box-shadow: 0 1px 3px rgba(0,50,100,.5);
+        }
+        input[type=range].aero-range::-moz-range-track {
+            height: 6px; border-radius: 3px; border: 1px solid #6a98bd; background: linear-gradient(#9cc3de, #e3f3fc);
+        }
+        input[type=range].aero-range::-moz-range-thumb {
+            width: 12px; height: 12px; border-radius: 50%; border: 1px solid #1d5f9a;
+            background: radial-gradient(circle at 35% 30%, #fff, #7fd3f7 55%, #2b8fdc);
+        }
+        .music-btn { min-width: 38px; height: 30px; font-size: 14px; line-height: 1; padding: 0 8px; }
+        .music-btn.big { min-width: 52px; height: 36px; font-size: 18px; border-radius: 18px; }
+        #tray-music, #tray-play { cursor: pointer; }
+        #tray-music:hover, #tray-play:hover { filter: drop-shadow(0 0 4px #bff); }
+
+        /* ---------- Toasts (track-change notifications) ---------- */
+        #toast-stack {
+            position: fixed; right: 10px; bottom: 50px; z-index: 100000;
+            display: flex; flex-direction: column; gap: 8px; align-items: flex-end; pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto; cursor: pointer; display: flex; gap: 10px; align-items: center;
+            width: 310px; max-width: calc(100vw - 20px); padding: 8px 10px; border-radius: 9px;
+            border: 1px solid rgba(255,255,255,.9);
+            background: linear-gradient(rgba(244,251,255,.94), rgba(178,220,247,.92));
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            box-shadow: 0 0 0 1px rgba(10,50,90,.5), 0 8px 24px rgba(0,40,90,.45), inset 0 1px 0 #fff;
+            color: #08243f; animation: toastin .28s ease-out;
+        }
+        .toast.out { animation: toastout .25s ease-in forwards; }
+        @keyframes toastin { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+        @keyframes toastout { to { opacity: 0; transform: translateX(40px); } }
+        .toast img { width: 56px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid #6a98bd; flex: none; }
+        .toast .t-head { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #1a6fb5; }
+        .toast .t-title { font-weight: 700; font-size: 12px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .toast .t-sub { font-size: 11px; color: #3b5f80; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        @media (prefers-reduced-motion: reduce) { .music-art.playing .eq i, .toast, .toast.out { animation: none; } }
+    </style>
+</head>
+<body id="desktop-body" class="h-full w-full wp-meadow relative overflow-hidden crt-screen">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="ig-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bff0ff"/><stop offset="1" stop-color="#1f7fd0"/></linearGradient>
+<radialGradient id="ig-orb" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#e6fbff"/><stop offset=".45" stop-color="#55b9f2"/><stop offset="1" stop-color="#0d58b5"/></radialGradient>
+<linearGradient id="ig-green" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b8f06a"/><stop offset="1" stop-color="#2c9a2e"/></linearGradient>
+<linearGradient id="ig-silver" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#c9d6e2"/><stop offset="1" stop-color="#8fa3b5"/></linearGradient>
+<linearGradient id="ig-gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#ffc83a"/><stop offset="1" stop-color="#e08a00"/></linearGradient>
+<linearGradient id="ig-dark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5b7a99"/><stop offset="1" stop-color="#0e2238"/></linearGradient>
+<linearGradient id="ig-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dfeaf5"/></linearGradient>
+<linearGradient id="ig-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fe7ff"/><stop offset="1" stop-color="#1b86d8"/></linearGradient>
+<linearGradient id="ig-shine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/></linearGradient>
+</defs></svg>
+    <div id="bubble-layer" aria-hidden="true"></div>
+
+    <!-- Desktop Area -->
+    <div id="desktop" class="absolute inset-0 bottom-10 p-3 grid grid-flow-col grid-rows-6 gap-4 auto-cols-max z-0">
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('browser')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="19" fill="url(#ig-orb)" stroke="#0a3f86" stroke-width="1.2"/><path d="M12 18c4-4 8-2 10 1s-1 6-4 7-3 6-6 4c-3-3-3-8 0-12zM27 9c4 0 8 3 9 6s-3 4-5 3-5 1-4 4 5 2 4 6-5 5-8 2c-2-3 3-6 1-9s-3-6 3-12z" fill="url(#ig-green)"/><ellipse cx="22" cy="13" rx="14" ry="8" fill="url(#ig-shine)"/></svg><span class="icon-label mt-1 text-xs leading-tight">Retroville</span></div>
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('explorer')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><rect x="5" y="7" width="38" height="27" rx="4" fill="url(#ig-silver)" stroke="#51657a"/><rect x="8.5" y="10.5" width="31" height="20" rx="2" fill="url(#ig-glass)" stroke="#0a3f86"/><path d="M8.5 25c8-6 14 3 31-4v8.5a2 2 0 0 1-2 2H10.5a2 2 0 0 1-2-2z" fill="#6fd16a" opacity=".9"/><path d="M8.5 10.5h31v8c-10 3-20-2-31 3z" fill="url(#ig-shine)" opacity=".7"/><path d="M18 34h12l2 6H16z" fill="url(#ig-silver)" stroke="#51657a"/><rect x="12" y="40" width="24" height="4" rx="2" fill="url(#ig-silver)" stroke="#51657a"/></svg><span class="icon-label mt-1 text-xs leading-tight">My Computer</span></div>
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('notepad')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><rect x="9" y="7" width="30" height="35" rx="3" fill="url(#ig-paper)" stroke="#51657a"/><rect x="9" y="7" width="30" height="8" rx="3" fill="url(#ig-glass)" stroke="#0a3f86"/><circle cx="16" cy="7" r="2" fill="#fff" stroke="#6a7f93"/><circle cx="24" cy="7" r="2" fill="#fff" stroke="#6a7f93"/><circle cx="32" cy="7" r="2" fill="#fff" stroke="#6a7f93"/><g stroke="#8fb3d1" stroke-width="1.5"><line x1="13" y1="21" x2="35" y2="21"/><line x1="13" y1="26" x2="35" y2="26"/><line x1="13" y1="31" x2="28" y2="31"/><line x1="13" y1="36" x2="24" y2="36"/></g><g transform="translate(31 25) rotate(40)"><rect x="-3" y="0" width="6" height="16" rx="1" fill="url(#ig-gold)" stroke="#7a5200"/><path d="M-3 16L0 22L3 16Z" fill="#f4d8b4" stroke="#7a5200"/><rect x="-3" y="-3" width="6" height="4" rx="1" fill="#ff6a8a" stroke="#7a5200"/></g></svg><span class="icon-label mt-1 text-xs leading-tight">Text Editor</span></div>
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('paint')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><path d="M24 5C12 5 4 13 4 23c0 9 7 17 16 17 3 0 4-2 3-4-1-3 1-5 4-5h6c6 0 11-3 11-9C44 12 35 5 24 5z" fill="url(#ig-paper)" stroke="#51657a" stroke-width="1.3"/><circle cx="14" cy="18" r="3.2" fill="#ff4b3a"/><circle cx="22" cy="12" r="3.2" fill="#ffd23a"/><circle cx="32" cy="13" r="3.2" fill="#3fcf4f"/><circle cx="37" cy="22" r="3.2" fill="#2f8cf0"/><circle cx="15" cy="29" r="3.8" fill="#fff" stroke="#9fb3c6"/><path d="M10 9c7-5 17-4 24 1-9-3-16-2-24-1z" fill="url(#ig-shine)"/></svg><span class="icon-label mt-1 text-xs leading-tight">Paint</span></div>
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('minesweeper')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><rect x="5" y="5" width="38" height="38" rx="6" fill="url(#ig-silver)" stroke="#51657a" stroke-width="1.3"/><rect x="8" y="8" width="32" height="32" rx="4" fill="url(#ig-glass)" opacity=".35"/><path d="M24 14v6M24 32v6M12 26h6M30 26h6M16 18l4 4M28 30l4 4M32 18l-4 4M20 30l-4 4" stroke="#0e2238" stroke-width="2" stroke-linecap="round"/><circle cx="24" cy="26" r="9" fill="url(#ig-dark)" stroke="#06121f"/><circle cx="21" cy="23" r="2.4" fill="#fff" opacity=".85"/><path d="M30 17c2-3 5-2 6-5" stroke="#8a5a2b" fill="none" stroke-width="1.6"/><circle cx="36" cy="10" r="2.6" fill="url(#ig-gold)"/></svg><span class="icon-label mt-1 text-xs leading-tight">Minesweeper</span></div>
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('calculator')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><rect x="9" y="4" width="30" height="40" rx="5" fill="url(#ig-silver)" stroke="#51657a" stroke-width="1.3"/><rect x="13" y="8" width="22" height="9" rx="2" fill="#bff3ff" stroke="#2d7fa8"/><path d="M13 8h22v4c-8 2-14 1-22 0z" fill="url(#ig-shine)" opacity=".8"/><rect x="13" y="21" width="6.5" height="5" rx="1.5" fill="#eef5fb" stroke="#8aa3ba"/><rect x="21" y="21" width="6.5" height="5" rx="1.5" fill="#eef5fb" stroke="#8aa3ba"/><rect x="29" y="21" width="6.5" height="5" rx="1.5" fill="url(#ig-gold)" stroke="#8aa3ba"/><rect x="13" y="28" width="6.5" height="5" rx="1.5" fill="#eef5fb" stroke="#8aa3ba"/><rect x="21" y="28" width="6.5" height="5" rx="1.5" fill="#eef5fb" stroke="#8aa3ba"/><rect x="29" y="28" width="6.5" height="5" rx="1.5" fill="url(#ig-gold)" stroke="#8aa3ba"/><rect x="13" y="35" width="6.5" height="5" rx="1.5" fill="#eef5fb" stroke="#8aa3ba"/><rect x="21" y="35" width="6.5" height="5" rx="1.5" fill="#eef5fb" stroke="#8aa3ba"/><rect x="29" y="35" width="6.5" height="5" rx="1.5" fill="url(#ig-green)" stroke="#8aa3ba"/></svg><span class="icon-label mt-1 text-xs leading-tight">Calculator</span></div>
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('terminal')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><rect x="4" y="7" width="40" height="34" rx="5" fill="url(#ig-dark)" stroke="#0a1b2c" stroke-width="1.3"/><rect x="4" y="7" width="40" height="8" rx="5" fill="url(#ig-glass)" opacity=".9"/><circle cx="10" cy="11" r="1.5" fill="#fff"/><circle cx="15" cy="11" r="1.5" fill="#fff"/><circle cx="20" cy="11" r="1.5" fill="#fff"/><path d="M10 22l6 4-6 4" stroke="#7dff9a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="20" y1="31" x2="30" y2="31" stroke="#7dff9a" stroke-width="2.4" stroke-linecap="round"/><path d="M4 7h40v14c-14 4-26 2-40-2z" fill="url(#ig-shine)" opacity=".4"/></svg><span class="icon-label mt-1 text-xs leading-tight">Terminal</span></div>
+        <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('settings')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><g transform="translate(24 24)"><g fill="url(#ig-silver)" stroke="#51657a" stroke-width="1.2"><rect transform="rotate(0)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/><rect transform="rotate(45)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/><rect transform="rotate(90)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/><rect transform="rotate(135)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/><rect transform="rotate(180)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/><rect transform="rotate(225)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/><rect transform="rotate(270)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/><rect transform="rotate(315)" x="-3.5" y="-20" width="7" height="8" rx="1.5"/></g><circle r="14.5" fill="url(#ig-silver)" stroke="#51657a" stroke-width="1.2"/><circle r="6" fill="url(#ig-glass)" stroke="#0a3f86"/><ellipse cx="-3" cy="-8" rx="9" ry="4" fill="url(#ig-shine)"/></g></svg><span class="icon-label mt-1 text-xs leading-tight">Settings</span></div>
+            <div class="shortcut-icon flex flex-col items-center w-20 p-2 cursor-pointer text-center group" onclick="openApp('music')"><svg class="w-12 h-12" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="19" fill="url(#ig-orb)" stroke="#0a3f86" stroke-width="1.2"/><path d="M20 31V16l12-3v14" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="16.5" cy="31.5" rx="4.5" ry="3.5" fill="#fff"/><ellipse cx="28.5" cy="27.5" rx="4.5" ry="3.5" fill="#fff"/><ellipse cx="22" cy="13" rx="14" ry="8" fill="url(#ig-shine)"/></svg><span class="icon-label mt-1 text-xs leading-tight">Music</span></div>
+    </div>
+
+    <!-- WINDOW TEMPLATES CONTAINER -->
+    <div id="window-container" class="absolute inset-0 pointer-events-none z-10 overflow-hidden">
+
+        <!-- 1. TEXT EDITOR (NOTEPAD) WINDOW -->
+        <div id="win-notepad" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto min-w-[280px] min-h-[220px]" style="width: 480px; height: 340px; top: 40px; left: 80px;">
+            <div class="win-titlebar bg-gradient-to-r from-[#000080] to-[#1084d0] text-white p-1 flex items-center justify-between cursor-move select-none">
+                <div class="flex items-center gap-1 font-bold text-xs truncate">
+                    <span class="px-1">📝</span> Text Editor - [Untitled.txt]
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('notepad')">_</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="toggleMaximize('notepad')">□</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5 aero-panel" onclick="closeWindow('notepad')">✕</button>
+                </div>
+            </div>
+            <!-- Menu Bar -->
+            <div class="flex gap-3 px-2 py-1 aero-panel text-xs border-b border-gray-400 select-none">
+                <span class="cursor-pointer hover:underline" onclick="notepadNew()">File</span>
+                <span class="cursor-pointer hover:underline" onclick="notepadSave()">Save</span>
+                <span class="cursor-pointer hover:underline" onclick="notepadClear()">Clear</span>
+                <span class="cursor-pointer hover:underline" onclick="notepadSample()">Sample Notes</span>
+            </div>
+            <!-- Body -->
+            <div class="flex-1 p-1 aero-panel flex flex-col">
+                <textarea id="notepad-textarea" class="w-full flex-1 win-inset p-2 font-mono text-sm resize-none focus:outline-none bg-white text-black" placeholder="Type your text here..."></textarea>
+                <div class="mt-1 flex justify-between text-[11px] text-gray-700 px-1 win-inset aero-panel">
+                    <span id="notepad-stats">Lines: 1 | Words: 0 | Chars: 0</span>
+                    <span>UTF-8</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. RETRO TERMINAL CLI WINDOW -->
+        <div id="win-terminal" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto min-w-[320px] min-h-[220px]" style="width: 520px; height: 320px; top: 70px; left: 120px;">
+            <div class="win-titlebar bg-gradient-to-r from-[#000080] to-[#1084d0] text-white p-1 flex items-center justify-between cursor-move select-none">
+                <div class="flex items-center gap-1 font-bold text-xs truncate">
+                    <span class="px-1">💻</span> RetroOS Terminal Command Prompt
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('terminal')">_</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="toggleMaximize('terminal')">□</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('terminal')">✕</button>
+                </div>
+            </div>
+            <div id="terminal-body" class="flex-1 bg-black text-green-400 p-2 terminal-font text-xs overflow-y-auto flex flex-col win-inset">
+                <div id="terminal-output" class="whitespace-pre-wrap leading-tight"></div>
+                <div class="flex items-center mt-1">
+                    <span id="terminal-prompt" class="text-green-400 mr-1 font-bold">C:\RETROOS&gt;</span>
+                    <input type="text" id="terminal-input" class="bg-transparent text-green-400 focus:outline-none flex-1 terminal-font text-xs" autofocus autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. RETRO PAINT CANVAS WINDOW -->
+        <div id="win-paint" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto min-w-[380px] min-h-[300px]" style="width:620px;height:470px;top:40px;left:140px;">
+<div class="bg-gradient-to-r from-[#000080] to-[#1084d0] win-titlebar text-white p-1 flex items-center justify-between cursor-move select-none"><div class="flex items-center gap-1 font-bold text-xs truncate"><span class="px-1">🎨</span>untitled - Paint</div><div class="flex items-center gap-1"><button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('paint')">_</button><button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="toggleMaximize('paint')">□</button><button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('paint')">✕</button></div></div>
+<div class="flex text-xs px-1 select-none border-b border-gray-500"><div class="relative group px-2 py-0.5 aero-hover cursor-default">File<div class="hidden group-hover:block absolute left-0 top-full aero-panel win-outset text-black z-50 min-w-[130px]"><div class="px-4 py-1 aero-hover cursor-pointer whitespace-nowrap" onclick="paintNew()">New</div><div class="px-4 py-1 aero-hover cursor-pointer whitespace-nowrap" onclick="downloadPaintCanvas()">Save As PNG...</div></div></div><div class="relative group px-2 py-0.5 aero-hover cursor-default">Edit<div class="hidden group-hover:block absolute left-0 top-full aero-panel win-outset text-black z-50 min-w-[130px]"><div class="px-4 py-1 aero-hover cursor-pointer whitespace-nowrap" onclick="paintUndoStep()">Undo</div><div class="px-4 py-1 aero-hover cursor-pointer whitespace-nowrap" onclick="clearPaintCanvas()">Clear Image</div></div></div><div class="relative group px-2 py-0.5 aero-hover cursor-default">Image<div class="hidden group-hover:block absolute left-0 top-full aero-panel win-outset text-black z-50 min-w-[130px]"><div class="px-4 py-1 aero-hover cursor-pointer whitespace-nowrap" onclick="paintInvert()">Invert Colors</div><div class="px-4 py-1 aero-hover cursor-pointer whitespace-nowrap" onclick="clearPaintCanvas()">Clear Image</div></div></div><div class="relative group px-2 py-0.5 aero-hover cursor-default">Help<div class="hidden group-hover:block absolute left-0 top-full aero-panel win-outset text-black z-50 min-w-[130px]"><div class="px-4 py-1 aero-hover cursor-pointer whitespace-nowrap" onclick="alert('Paint\nRetroOS Aero')">About Paint</div></div></div></div>
+<div class="flex flex-1 min-h-0 p-1 gap-1">
+<div class="flex flex-col gap-1 select-none"><div id="paint-tools" class="grid grid-cols-2 win-inset p-0.5"></div><div id="paint-sizes" class="win-inset p-1 flex flex-col gap-1.5 items-center"></div></div>
+<div class="flex-1 win-inset canvas-well overflow-auto"><canvas id="paint-canvas" width="480" height="320" class="bg-white block" style="touch-action:none;cursor:crosshair"></canvas></div>
+</div>
+<div class="flex items-center gap-2 px-1 pb-1 select-none"><div class="relative w-8 h-8 shrink-0 win-inset"><div id="paint-bg-box" class="absolute w-4 h-4 win-outset" style="right:2px;bottom:2px;background:#fff"></div><div id="current-color-indicator" class="absolute w-4 h-4 win-outset" style="left:2px;top:2px;background:#000"></div></div><div id="palette" class="grid grid-rows-2 grid-flow-col gap-px"></div></div>
+<div class="flex text-[11px] gap-1 px-1 pb-1"><div id="paint-hint" class="flex-1 win-inset px-1 truncate">For Help, click Help Topics on the Help Menu.</div><div id="paint-pos" class="win-inset px-1 w-20">0,0</div></div>
+</div>
+<div id="win-browser" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto min-w-[420px] min-h-[320px]" style="width:760px;height:500px;top:20px;left:90px;">
+<div class="bg-gradient-to-r from-[#000080] to-[#1084d0] win-titlebar text-white p-1 flex items-center justify-between cursor-move select-none"><div class="flex items-center gap-1 font-bold text-xs truncate"><span class="px-1">🌐</span>Retroville - Retroville Browser</div><div class="flex items-center gap-1"><button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('browser')">_</button><button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="toggleMaximize('browser')">□</button><button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('browser')">✕</button></div></div>
+<div class="flex text-xs px-1 select-none border-b border-gray-500"><span class="px-2 py-0.5">File</span><span class="px-2 py-0.5">Edit</span><span class="px-2 py-0.5">View</span><span class="px-2 py-0.5 aero-hover cursor-pointer" onclick="rvShow({t:'fav'})">Favorites</span><span class="px-2 py-0.5">Tools</span><span class="px-2 py-0.5">Help</span></div>
+<div class="flex items-center gap-0.5 p-1 text-[11px] select-none border-b border-gray-500">
+<button class="btn-retro px-2 py-0.5" onclick="rvBack()">◀ Back</button><button class="btn-retro px-2 py-0.5" onclick="rvFwd()">▶</button><button class="btn-retro px-2 py-0.5" onclick="rvStop()">⛔ Stop</button><button class="btn-retro px-2 py-0.5" onclick="rvReload()">🔄 Refresh</button><button class="btn-retro px-2 py-0.5" onclick="rvShow({t:'home'})">🏠 Home</button><button class="btn-retro px-2 py-0.5" onclick="rvShow({t:'home'})">🔍 Search</button><button class="btn-retro px-2 py-0.5" onclick="rvShow({t:'fav'})">⭐ Favorites</button>
+<div class="ml-auto win-inset bg-black w-9 h-9 flex items-center justify-center text-xl"><span id="rv-globe">🌐</span></div></div>
+<div class="flex items-center gap-1 p-1 text-xs select-none border-b border-gray-500"><span>Address</span><input id="rv-addr" class="flex-1 win-inset bg-white px-1 py-0.5 text-xs focus:outline-none" spellcheck="false" onkeydown="if(event.key==='Enter')rvGo(this.value)"><button class="btn-retro px-2 py-0.5" onclick="rvGo(document.getElementById('rv-addr').value)">Go</button></div>
+<div id="rv-content" class="flex-1 min-h-0 win-inset bg-white overflow-auto text-black" style="font-family:Arial,Helvetica,sans-serif"></div>
+<div class="flex text-[11px] gap-1 px-1 py-0.5 select-none"><div id="rv-status" class="flex-1 win-inset px-1">Done</div><div class="win-inset px-2">🌐 Internet</div></div>
+</div>
+
+        <!-- 4. MINESWEEPER WINDOW -->
+        <div id="win-minesweeper" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto" style="width: 280px; height: 350px; top: 90px; left: 220px;">
+            <div class="win-titlebar bg-gradient-to-r from-[#000080] to-[#1084d0] text-white p-1 flex items-center justify-between cursor-move select-none">
+                <div class="flex items-center gap-1 font-bold text-xs truncate">
+                    <span class="px-1">💣</span> Minesweeper
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('minesweeper')">_</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('minesweeper')">✕</button>
+                </div>
+            </div>
+            <div class="p-2 flex flex-col items-center aero-panel">
+                <!-- Header LED Score Board -->
+                <div class="w-full win-inset p-2 mb-2 aero-panel flex items-center justify-between">
+                    <div id="mine-count-display" class="bg-black text-red-600 pixel-font text-2xl font-bold px-2 py-0.5 border border-gray-600 w-12 text-center">010</div>
+                    <button id="minesweeper-face" class="btn-retro w-8 h-8 text-lg flex items-center justify-center leading-none" onclick="initMinesweeper()">🙂</button>
+                    <div id="mine-timer-display" class="bg-black text-red-600 pixel-font text-2xl font-bold px-2 py-0.5 border border-gray-600 w-12 text-center">000</div>
+                </div>
+                <!-- Minesweeper Grid -->
+                <div id="minesweeper-grid" class="win-inset canvas-well p-1 grid grid-cols-9 gap-0.5 select-none"></div>
+                <!-- Touch Mobile Flag Toggle -->
+                <div class="mt-2 w-full flex items-center justify-between text-xs">
+                    <button id="flag-mode-btn" class="btn-retro px-2 py-1 flex-1 text-center font-bold" onclick="toggleFlagMode()">🚩 Mode: Dig</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. RETRO CALCULATOR WINDOW -->
+        <div id="win-calculator" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto" style="width: 240px; height: 310px; top: 110px; left: 300px;">
+            <div class="win-titlebar bg-gradient-to-r from-[#000080] to-[#1084d0] text-white p-1 flex items-center justify-between cursor-move select-none">
+                <div class="flex items-center gap-1 font-bold text-xs truncate">
+                    <span class="px-1">🧮</span> Calculator
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('calculator')">_</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('calculator')">✕</button>
+                </div>
+            </div>
+            <div class="p-3 aero-panel flex flex-col gap-2">
+                <!-- LCD Display -->
+                <div class="win-inset calc-lcd p-2 text-right font-mono text-xl text-black font-bold h-10 flex items-center justify-end overflow-hidden shadow-inner">
+                    <span id="calc-display">0</span>
+                </div>
+                <!-- Keypad -->
+                <div class="grid grid-cols-4 gap-1">
+                    <button class="btn-retro py-1 text-xs font-bold text-red-700" onclick="calcClear()">C</button>
+                    <button class="btn-retro py-1 text-xs font-bold text-red-700" onclick="calcCE()">CE</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcOp('sqrt')">√</button>
+                    <button class="btn-retro py-1 text-xs font-bold text-blue-800" onclick="calcOp('/')">/</button>
+
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('7')">7</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('8')">8</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('9')">9</button>
+                    <button class="btn-retro py-1 text-xs font-bold text-blue-800" onclick="calcOp('*')">*</button>
+
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('4')">4</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('5')">5</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('6')">6</button>
+                    <button class="btn-retro py-1 text-xs font-bold text-blue-800" onclick="calcOp('-')">-</button>
+
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('1')">1</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('2')">2</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('3')">3</button>
+                    <button class="btn-retro py-1 text-xs font-bold text-blue-800" onclick="calcOp('+')">+</button>
+
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('0')">0</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcNum('.')">.</button>
+                    <button class="btn-retro py-1 text-xs font-bold" onclick="calcToggleSign()">±</button>
+                    <button class="btn-retro py-1 text-xs font-bold bg-[#2fae3e] text-white" onclick="calcEquals()">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. SYSTEM SETTINGS WINDOW -->
+        <div id="win-settings" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto" style="width: 420px; height: 350px; top: 60px; left: 200px;">
+            <div class="win-titlebar bg-gradient-to-r from-[#000080] to-[#1084d0] text-white p-1 flex items-center justify-between cursor-move select-none">
+                <div class="flex items-center gap-1 font-bold text-xs truncate">
+                    <span class="px-1">⚙️</span> System Control Panel &amp; Settings
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('settings')">_</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('settings')">✕</button>
+                </div>
+            </div>
+            <div class="p-3 aero-panel flex-1 flex flex-col gap-3 overflow-y-auto">
+                <fieldset class="win-outset p-2 flex flex-col gap-2">
+                    <legend class="font-bold text-xs px-1">Display &amp; Desktop</legend>
+                    <div class="flex items-center justify-between">
+                        <label for="wallpaper-select" class="text-xs">Wallpaper Theme:</label>
+                        <select id="wallpaper-select" class="win-inset bg-white text-xs p-1" onchange="changeWallpaper(this.value)">
+                            <option value="wp-meadow">Sunny Meadow</option>
+                            <option value="wp-aero">Aurora Glass</option>
+                            <option value="wp-ocean">Crystal Ocean</option>
+                            <option value="wp-city">Future City</option>
+                            <option value="wp-bubbles">Bubble Pop</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center justify-between mt-1">
+                        <span class="text-xs">Glass Shine &amp; Floating Bubbles:</span>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="crt-toggle" checked class="sr-only" onchange="toggleCRT(this.checked)">
+                            <div class="w-8 h-4 bg-gray-400 rounded-full border border-gray-600 relative p-0.5 transition-colors">
+                                <div id="crt-indicator" class="w-3 h-3 bg-green-600 rounded-full transition-transform transform translate-x-4"></div>
+                            </div>
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="win-outset p-2 flex flex-col gap-2">
+                    <legend class="font-bold text-xs px-1">Audio &amp; Sound Effects</legend>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs">System Synthesizer Audio:</span>
+                        <button id="sound-toggle-btn" class="btn-retro px-2 py-0.5 text-xs font-bold" onclick="toggleSound()">🔊 Enabled</button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs">Test System Sound:</span>
+                        <button class="btn-retro px-2 py-0.5 text-xs" onclick="playStartupSound()">▶ Play Chime</button>
+                    </div>
+                </fieldset>
+
+                <fieldset class="win-outset p-2 flex flex-col gap-2">
+                    <legend class="font-bold text-xs px-1">System Metrics &amp; Performance</legend>
+                    <div class="flex justify-between items-center text-xs">
+                        <span>Simulated CPU Usage:</span>
+                        <span id="cpu-usage-text" class="font-mono font-bold">12%</span>
+                    </div>
+                    <div class="w-full win-inset h-3 bg-gray-300 relative overflow-hidden">
+                        <div id="cpu-bar" class="h-full bg-blue-700 w-12 transition-all duration-300"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs mt-1">
+                        <span>RAM Memory Meter:</span>
+                        <span id="ram-usage-text" class="font-mono font-bold">14.2 MB / 32 MB</span>
+                    </div>
+                    <div class="w-full win-inset h-3 bg-gray-300 relative overflow-hidden">
+                        <div id="ram-bar" class="h-full bg-green-700 w-24 transition-all duration-300"></div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-gray-700 mt-1">
+                        <span>System Uptime:</span>
+                        <span id="system-uptime" class="font-mono">00:00:00</span>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+
+        <!-- 8. MUSIC PLAYER WINDOW -->
+        <div id="win-music" class="window absolute hidden flex-col pointer-events-auto min-w-[300px] min-h-[400px]" style="width: 340px; height: 450px; top: 60px; left: 260px;">
+            <div class="win-titlebar text-white p-1 flex items-center justify-between cursor-move select-none">
+                <div class="flex items-center gap-1 font-bold text-xs truncate">
+                    <span class="px-1">🎵</span> Music Player
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('music')">_</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('music')" title="Closing the window keeps the music playing">✕</button>
+                </div>
+            </div>
+            <div class="flex-1 min-h-0 overflow-y-auto p-2 flex flex-col gap-2 text-xs">
+                <div id="music-art" class="music-art">
+                    <div class="music-note">♪</div>
+                    <img id="music-img" alt="" style="display:none; position:absolute; inset:0;">
+                    <div class="eq"><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div>
+                    <div id="music-title" class="font-bold text-sm leading-tight" style="min-height: 2.4em;">Waiting for the playlist…</div>
+                    <div id="music-artist" class="text-[11px] truncate" style="color:#3b5f80;">—</div>
+                    <div id="music-track" class="text-[11px]" style="color:#3b5f80;">🔁 Repeat all</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="music-cur" class="font-mono text-[11px] w-9 text-right">0:00</span>
+                    <input id="music-seek" type="range" min="0" max="1000" value="0" class="aero-range" aria-label="Seek">
+                    <span id="music-dur" class="font-mono text-[11px] w-9">0:00</span>
+                </div>
+                <div class="flex items-center justify-center gap-2">
+                    <button class="btn-retro music-btn" onclick="musicPrev()" title="Previous track" aria-label="Previous track">⏮</button>
+                    <button id="music-play" class="btn-retro music-btn big" onclick="musicToggle()" title="Play / Pause" aria-label="Play or pause">▶</button>
+                    <button class="btn-retro music-btn" onclick="musicNext()" title="Next track" aria-label="Next track">⏭</button>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="music-mute" class="btn-retro music-btn" onclick="musicMute()" title="Mute / Unmute" aria-label="Mute or unmute">🔊</button>
+                    <button class="btn-retro music-btn" style="min-width:28px;padding:0 4px;" onclick="musicVolStep(-10)" title="Volume down" aria-label="Volume down">−</button>
+                    <input id="music-vol" type="range" min="0" max="100" value="60" class="aero-range" aria-label="Volume">
+                    <button class="btn-retro music-btn" style="min-width:28px;padding:0 4px;" onclick="musicVolStep(10)" title="Volume up" aria-label="Volume up">+</button>
+                    <span id="music-vol-label" class="font-mono text-[11px] w-10 text-right">60%</span>
+                </div>
+                <label class="flex items-center gap-1 select-none cursor-pointer">
+                    <input type="checkbox" id="music-notify" checked> Notify me when the track changes
+                </label>
+                <div id="music-status" class="win-inset aero-panel px-1 py-0.5 text-[11px]" style="min-height:1.6em; word-break:break-word;">Loading player…</div>
+            </div>
+        </div>
+
+        <!-- 7. MY COMPUTER / FILE EXPLORER WINDOW -->
+        <div id="win-explorer" class="window absolute aero-panel win-outset hidden flex-col pointer-events-auto min-w-[320px] min-h-[240px]" style="width: 460px; height: 320px; top: 80px; left: 100px;">
+            <div class="win-titlebar bg-gradient-to-r from-[#000080] to-[#1084d0] text-white p-1 flex items-center justify-between cursor-move select-none">
+                <div class="flex items-center gap-1 font-bold text-xs truncate">
+                    <span class="px-1">📁</span> My Computer - File Explorer
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="minimizeWindow('explorer')">_</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="toggleMaximize('explorer')">□</button>
+                    <button class="btn-retro px-1.5 text-black text-xs font-bold leading-none h-5" onclick="closeWindow('explorer')">✕</button>
+                </div>
+            </div>
+            <!-- Path bar -->
+            <div class="p-1 aero-panel border-b border-gray-400 flex items-center gap-2 text-xs">
+                <span>Address:</span>
+                <div class="win-inset bg-white px-2 py-0.5 flex-1 font-mono text-xs">C:\RETROOS\SYSTEM32</div>
+            </div>
+            <div class="p-3 bg-white flex-1 win-inset m-1 overflow-y-auto grid grid-cols-3 gap-3 content-start">
+                <div class="flex flex-col items-center p-2 rounded hover:bg-blue-100 cursor-pointer text-center" onclick="openApp('notepad')">
+                    <span class="text-2xl">📄</span>
+                    <span class="text-xs mt-1">README.TXT</span>
+                </div>
+                <div class="flex flex-col items-center p-2 rounded hover:bg-blue-100 cursor-pointer text-center" onclick="openApp('paint')">
+                    <span class="text-2xl">🖼️</span>
+                    <span class="text-xs mt-1">ARTWORK.BMP</span>
+                </div>
+                <div class="flex flex-col items-center p-2 rounded hover:bg-blue-100 cursor-pointer text-center" onclick="openApp('minesweeper')">
+                    <span class="text-2xl">🎮</span>
+                    <span class="text-xs mt-1">MINESWEEP.EXE</span>
+                </div>
+                <div class="flex flex-col items-center p-2 rounded hover:bg-blue-100 cursor-pointer text-center" onclick="openApp('calculator')">
+                    <span class="text-2xl">🧮</span>
+                    <span class="text-xs mt-1">CALC.EXE</span>
+                </div>
+                <div class="flex flex-col items-center p-2 rounded hover:bg-blue-100 cursor-pointer text-center" onclick="openApp('terminal')">
+                    <span class="text-2xl">⚙️</span>
+                    <span class="text-xs mt-1">COMMAND.COM</span>
+                </div>
+                <div class="flex flex-col items-center p-2 rounded hover:bg-blue-100 cursor-pointer text-center" onclick="openApp('settings')">
+                    <span class="text-2xl">🔧</span>
+                    <span class="text-xs mt-1">CONTROL.EXE</span>
+                </div>
+            </div>
+            <div class="px-2 py-0.5 aero-panel text-[11px] text-gray-700 flex justify-between border-t border-gray-400">
+                <span>6 Object(s)</span>
+                <span>Drive C: 1.44 MB Free</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- START MENU POPUP -->
+    <div id="start-menu" class="fixed bottom-10 left-1 w-56 aero-panel win-outset hidden flex-col z-50 select-none shadow-2xl">
+        <div class="flex">
+            <!-- Vertical Banner -->
+            <div class="w-7 bg-gradient-to-t from-[#000080] to-[#1084d0] flex items-end justify-center py-2">
+                <span class="transform -rotate-90 text-white font-bold tracking-wider text-sm whitespace-nowrap">RetroOS Aero</span>
+            </div>
+            <!-- Menu items -->
+            <div class="flex-1 py-1 flex flex-col text-xs">
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('browser'); closeStartMenu();"><span>🌐</span> Retroville Browser</div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('notepad'); closeStartMenu();">
+                    <span>📝</span> Notepad
+                </div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('paint'); closeStartMenu();">
+                    <span>🎨</span> Paint
+                </div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('minesweeper'); closeStartMenu();">
+                    <span>💣</span> Minesweeper
+                </div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('calculator'); closeStartMenu();">
+                    <span>🧮</span> Calculator
+                </div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('music'); closeStartMenu();"><span>🎵</span> Music Player</div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('terminal'); closeStartMenu();">
+                    <span>💻</span> Command Terminal
+                </div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('explorer'); closeStartMenu();">
+                    <span>📁</span> File Explorer
+                </div>
+                <hr class="my-1 border-gray-400">
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="openApp('settings'); closeStartMenu();">
+                    <span>⚙️</span> Control Panel
+                </div>
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer" onclick="showAboutDialog(); closeStartMenu();">
+                    <span>❓</span> Help &amp; About
+                </div>
+                <hr class="my-1 border-gray-400">
+                <div class="px-3 py-1.5 aero-hover flex items-center gap-2 cursor-pointer font-bold" onclick="showShutdownDialog(); closeStartMenu();">
+                    <span>💻</span> Shut Down...
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Background music: hidden YouTube player + notification stack -->
+    <div id="yt-holder" aria-hidden="true" style="position:fixed;left:-10000px;top:0;width:320px;height:180px;overflow:hidden;opacity:0;pointer-events:none"><div id="yt-player"></div></div>
+    <div id="toast-stack" aria-live="polite"></div>
+
+    <!-- TASKBAR -->
+    <div id="taskbar" class="fixed bottom-0 left-0 right-0 h-10 aero-panel win-outset flex items-center justify-between px-1 z-40 select-none">
+        <div class="flex items-center gap-1 overflow-x-auto flex-1 mr-2">
+            <!-- Start Button -->
+            <button id="start-btn" title="Start" aria-label="Start" onclick="toggleStartMenu()"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 5c3-1.5 5.5-1.5 8 0v6c-2.5-1.5-5-1.5-8 0z" fill="#ff5a36"/><path d="M13 5.5c2.5 1.4 5 1.4 8 0v6c-3 1.4-5.5 1.4-8 0z" fill="#7bd43a"/><path d="M3 13c3-1.5 5.5-1.5 8 0v6c-2.5-1.5-5-1.5-8 0z" fill="#2fa8ff"/><path d="M13 13.5c2.5 1.4 5 1.4 8 0v6c-3 1.4-5.5 1.4-8 0z" fill="#ffd21f"/></svg></button>
+            <div class="tb-sep"></div>
+            <!-- Open Taskbar Items Container -->
+            <div id="taskbar-apps" class="flex items-center gap-1 overflow-x-auto flex-1"></div>
+        </div>
+
+        <!-- System Tray -->
+        <div class="win-inset px-2 py-1 flex items-center gap-2 aero-panel text-xs">
+            <span id="tray-music" title="Open Music Player" onclick="openApp('music')">🎵</span><span id="tray-play" class="font-bold" title="Play / Pause music" onclick="musicToggle()">▶</span><span id="tray-sound" class="cursor-pointer" title="Toggle UI sound effects" onclick="toggleSound()">🔊</span>
+            <span id="system-clock" class="font-mono text-xs font-bold">12:00 PM</span>
+        </div>
+    </div>
+
+    <!-- MODAL SHUTDOWN DIALOG -->
+    <div id="shutdown-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="aero-panel win-outset p-3 w-80 flex flex-col gap-3">
+            <div class="win-titlebar bg-[#000080] text-white p-1 font-bold text-xs flex justify-between">
+                <span>Shut Down RetroOS</span>
+                <button onclick="hideShutdownDialog()" class="px-1 text-black aero-panel btn-retro">✕</button>
+            </div>
+            <div class="flex items-center gap-3 p-2">
+                <span class="text-3xl">💻</span>
+                <p class="text-xs">Are you sure you want to shut down your computer session?</p>
+            </div>
+            <div class="flex justify-end gap-2 mt-2">
+                <button class="btn-retro px-3 py-1 text-xs font-bold" onclick="simulatePowerOff()">Yes, Shut Down</button>
+                <button class="btn-retro px-3 py-1 text-xs" onclick="hideShutdownDialog()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ABOUT DIALOG -->
+    <div id="about-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="aero-panel win-outset p-3 w-80 flex flex-col gap-3">
+            <div class="win-titlebar bg-[#000080] text-white p-1 font-bold text-xs flex justify-between">
+                <span>About RetroOS Aero</span>
+                <button onclick="hideAboutDialog()" class="px-1 text-black aero-panel btn-retro">✕</button>
+            </div>
+            <div class="flex flex-col items-center text-center p-2 gap-2">
+                <div class="text-4xl">🖥️</div>
+                <h3 class="font-bold text-sm">RetroOS Aero Web Edition</h3>
+                <p class="text-xs text-gray-700">Version 7.0.2007 (Build 7000)</p>
+                <p class="text-[11px] leading-tight text-gray-600 mt-1">A Frutiger Aero-styled desktop with glass windows, glossy buttons, drifting bubbles, Web Audio sound, paint canvas, CLI terminal, &amp; minesweeper.</p>
+            </div>
+            <div class="flex justify-center mt-2">
+                <button class="btn-retro px-4 py-1 text-xs font-bold" onclick="hideAboutDialog()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Web Audio API Synthesizer
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+        }
+
+        function playBeep(freq = 440, type = 'sine', duration = 0.08) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function playClickSound() {
+            playBeep(800, 'square', 0.03);
+        }
+
+        function playStartupSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+                const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5 chord sweep
+                notes.forEach((freq, idx) => {
+                    setTimeout(() => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 0.6);
+                    }, idx * 120);
+                });
+            } catch(e) {}
+        }
+
+        function playExplodeSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                playBeep(120, 'sawtooth', 0.3);
+            } catch(e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('sound-toggle-btn');
+            const trayIcon = document.getElementById('tray-sound');
+            if (soundEnabled) {
+                if (btn) btn.innerHTML = '🔊 Enabled';
+                if (trayIcon) trayIcon.innerHTML = '🔊';
+                playClickSound();
+            } else {
+                if (btn) btn.innerHTML = '🔇 Muted';
+                if (trayIcon) trayIcon.innerHTML = '🔇';
+            }
+        }
+
+        let activeZIndex = 10;
+        let openApps = new Set();
+        let minimizedApps = new Set();
+        const appTitles = {
+            notepad: '📝 Text Editor',
+            terminal: '💻 Terminal',
+            paint: '🎨 Paint',
+            browser: '🌐 Retroville',
+            minesweeper: '💣 Minesweeper',
+            calculator: '🧮 Calculator',
+            settings: '⚙️ Settings',
+            explorer: '📁 My Computer',
+            music: '🎵 Music Player'
+        };
+
+        function focusWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (!win) return;
+            activeZIndex++;
+            win.style.zIndex = activeZIndex;
+
+            // Highlight active titlebar styling
+            document.querySelectorAll('.window').forEach(w => w.classList.add('inactive'));
+            win.classList.remove('inactive');
+
+            renderTaskbar();
+        }
+
+        function openApp(appId) {
+            playClickSound();
+            const win = document.getElementById(`win-${appId}`);
+            if (!win) return;
+
+            win.classList.remove('hidden');
+            win.classList.add('flex');
+            openApps.add(appId);
+            minimizedApps.delete(appId);
+
+            focusWindow(appId);
+            renderTaskbar();
+
+            // Special init triggers
+            if (appId === 'paint') initPaintCanvas();
+            if (appId === 'browser' && !rv.h.length) rvShow({t:'home'});
+            if (appId === 'minesweeper' && !minesweeperInitialized) initMinesweeper();
+            if (appId === 'terminal') document.getElementById('terminal-input').focus();
+        }
+
+        function closeWindow(appId) {
+            playClickSound();
+            const win = document.getElementById(`win-${appId}`);
+            if (win) {
+                win.classList.add('hidden');
+                win.classList.remove('flex');
+            }
+            openApps.delete(appId);
+            minimizedApps.delete(appId);
+            renderTaskbar();
+        }
+
+        function minimizeWindow(appId) {
+            playClickSound();
+            const win = document.getElementById(`win-${appId}`);
+            if (win) {
+                win.classList.add('hidden');
+                win.classList.remove('flex');
+            }
+            minimizedApps.add(appId);
+            renderTaskbar();
+        }
+
+        function toggleMaximize(appId) {
+            playClickSound();
+            const win = document.getElementById(`win-${appId}`);
+            if (!win) return;
+            if (win.getAttribute('data-maximized') === 'true') {
+                win.style.top = win.getAttribute('data-prev-top') || '40px';
+                win.style.left = win.getAttribute('data-prev-left') || '40px';
+                win.style.width = win.getAttribute('data-prev-width') || '400px';
+                win.style.height = win.getAttribute('data-prev-height') || '300px';
+                win.setAttribute('data-maximized', 'false');
+            } else {
+                win.setAttribute('data-prev-top', win.style.top);
+                win.setAttribute('data-prev-left', win.style.left);
+                win.setAttribute('data-prev-width', win.style.width);
+                win.setAttribute('data-prev-height', win.style.height);
+
+                win.style.top = '0px';
+                win.style.left = '0px';
+                win.style.width = '100%';
+                win.style.height = 'calc(100% - 40px)';
+                win.setAttribute('data-maximized', 'true');
+            }
+        }
+
+        function renderTaskbar() {
+            const container = document.getElementById('taskbar-apps');
+            container.innerHTML = '';
+            openApps.forEach(appId => {
+                const btn = document.createElement('button');
+                const isMinimized = minimizedApps.has(appId);
+                btn.className = `btn-retro px-2 py-0.5 text-xs flex items-center gap-1 font-bold truncate max-w-[120px] ${!isMinimized ? 'active bg-gray-300' : ''}`;
+                btn.innerHTML = appTitles[appId] || appId;
+                btn.onclick = () => {
+                    if (isMinimized) {
+                        openApp(appId);
+                    } else {
+                        minimizeWindow(appId);
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        // Draggable Windows Handler (Mouse + Touch Adaptability)
+        document.querySelectorAll('.window').forEach(win => {
+            const titlebar = win.querySelector('.win-titlebar');
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+
+            function onPointerDown(e) {
+                if (e.target.tagName === 'BUTTON') return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                isDragging = true;
+                startX = clientX;
+                startY = clientY;
+                initialLeft = win.offsetLeft;
+                initialTop = win.offsetTop;
+
+                const appId = win.id.replace('win-', '');
+                focusWindow(appId);
+
+                document.addEventListener('mousemove', onPointerMove);
+                document.addEventListener('mouseup', onPointerUp);
+                document.addEventListener('touchmove', onPointerMove, { passive: false });
+                document.addEventListener('touchend', onPointerUp);
+            }
+
+            function onPointerMove(e) {
+                if (!isDragging) return;
+                if (win.getAttribute('data-maximized') === 'true') return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+
+                win.style.left = `${Math.max(0, initialLeft + dx)}px`;
+                win.style.top = `${Math.max(0, initialTop + dy)}px`;
+            }
+
+            function onPointerUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onPointerMove);
+                document.removeEventListener('mouseup', onPointerUp);
+                document.removeEventListener('touchmove', onPointerMove);
+                document.removeEventListener('touchend', onPointerUp);
+            }
+
+            if (titlebar) {
+                titlebar.addEventListener('mousedown', onPointerDown);
+                titlebar.addEventListener('touchstart', onPointerDown, { passive: false });
+            }
+
+            win.addEventListener('mousedown', () => {
+                const appId = win.id.replace('win-', '');
+                focusWindow(appId);
+            });
+        });
+
+        const notepadTextarea = document.getElementById('notepad-textarea');
+        const notepadStats = document.getElementById('notepad-stats');
+
+        notepadTextarea.addEventListener('input', () => {
+            const text = notepadTextarea.value;
+            const lines = text.split('\n').length;
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const chars = text.length;
+            notepadStats.textContent = `Lines: ${lines} | Words: ${words} | Chars: ${chars}`;
+        });
+
+        function notepadNew() {
+            notepadTextarea.value = '';
+            notepadTextarea.dispatchEvent(new Event('input'));
+        }
+
+        function notepadClear() {
+            notepadTextarea.value = '';
+            notepadTextarea.dispatchEvent(new Event('input'));
+        }
+
+        function notepadSample() {
+            notepadTextarea.value = "WELCOME TO RETROOS 95!\n======================\n\nFeatures Included:\n- Draggable 90s Beveled Windows\n- Web Audio Synthesizer\n- Retro Canvas Paint Engine\n- Minesweeper Game\n- Interactive Command Terminal\n- Standard Calculator & Settings\n\nHave fun exploring the vintage OS environment!";
+            notepadTextarea.dispatchEvent(new Event('input'));
+        }
+
+        function notepadSave() {
+            const blob = new Blob([notepadTextarea.value], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Document.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        const terminalOutput = document.getElementById('terminal-output');
+        const terminalInput = document.getElementById('terminal-input');
+
+        const terminalWelcome = `RetroOS Aero [Version 7.0.2007]\n(C) Copyright RetroOS Corp 2007.\nType 'help' for a list of available CLI commands.\n\n`;
+        terminalOutput.textContent = terminalWelcome;
+
+        terminalInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const cmdText = terminalInput.value.trim();
+                terminalOutput.textContent += `C:\\RETROOS> ${terminalInput.value}\n`;
+                terminalInput.value = '';
+                processCommand(cmdText);
+                const termBody = document.getElementById('terminal-body');
+                termBody.scrollTop = termBody.scrollHeight;
+            }
+        });
+
+        function processCommand(cmd) {
+            if (!cmd) return;
+            const parts = cmd.split(' ');
+            const mainCmd = parts[0].toLowerCase();
+            const args = parts.slice(1).join(' ');
+
+            switch(mainCmd) {
+                case 'help':
+                    terminalOutput.textContent += `Available Commands:\n` +
+                        `  help      - Displays command list\n` +
+                        `  dir       - List directory files\n` +
+                        `  cat [file]- Display file contents\n` +
+                        `  date      - Display current system date & time\n` +
+                        `  echo [txt]- Output text string\n` +
+                        `  calc [expr]- Simple arithmetic evaluation\n` +
+                        `  clear     - Clear terminal screen\n` +
+                        `  theme     - Change font color (green|amber|white)\n` +
+                        `  beep      - Play audio synthesizer beep\n` +
+                        `  about     - Show system information\n\n`;
+                    break;
+                case 'dir':
+                    terminalOutput.textContent += ` Directory of C:\\RETROOS\n\n` +
+                        `README   TXT        1,024  10-09-07  12:00p\n` +
+                        `ARTWORK  BMP      245,760  10-09-07  12:00p\n` +
+                        `MINESWEEP EXE       65,536  10-09-07  12:00p\n` +
+                        `CALC     EXE       32,768  10-09-07  12:00p\n` +
+                        `COMMAND  COM       18,432  10-09-07  12:00p\n` +
+                        `        5 File(s)    363,520 bytes free\n\n`;
+                    break;
+                case 'cat':
+                    if (args.toLowerCase() === 'readme.txt') {
+                        terminalOutput.textContent += `RetroOS Aero Readme File:\nEnjoy operating in this retro simulation web desktop application.\n\n`;
+                    } else {
+                        terminalOutput.textContent += `File not found: ${args}\n\n`;
+                    }
+                    break;
+                case 'date':
+                    terminalOutput.textContent += `Current Date: ${new Date().toLocaleString()}\n\n`;
+                    break;
+                case 'echo':
+                    terminalOutput.textContent += `${args}\n\n`;
+                    break;
+                case 'calc':
+                    try {
+                        const res = eval(args.replace(/[^0-9+\-*/().]/g, ''));
+                        terminalOutput.textContent += `Result: ${res}\n\n`;
+                    } catch(e) {
+                        terminalOutput.textContent += `Invalid expression.\n\n`;
+                    }
+                    break;
+                case 'clear':
+                    terminalOutput.textContent = '';
+                    break;
+                case 'theme':
+                    const termBody = document.getElementById('terminal-body');
+                    const termPrompt = document.getElementById('terminal-prompt');
+                    if (args === 'amber') {
+                        termBody.className = termBody.className.replace(/text-\w+-\d+/g, '') + ' text-amber-500';
+                        termPrompt.className = 'text-amber-500 mr-1 font-bold';
+                        terminalInput.className = terminalInput.className.replace(/text-\w+-\d+/g, '') + ' text-amber-500';
+                    } else if (args === 'white') {
+                        termBody.className = termBody.className.replace(/text-\w+-\d+/g, '') + ' text-white';
+                        termPrompt.className = 'text-white mr-1 font-bold';
+                        terminalInput.className = terminalInput.className.replace(/text-\w+-\d+/g, '') + ' text-white';
+                    } else {
+                        termBody.className = termBody.className.replace(/text-\w+-\d+/g, '') + ' text-green-400';
+                        termPrompt.className = 'text-green-400 mr-1 font-bold';
+                        terminalInput.className = terminalInput.className.replace(/text-\w+-\d+/g, '') + ' text-green-400';
+                    }
+                    terminalOutput.textContent += `Terminal color theme updated.\n\n`;
+                    break;
+                case 'beep':
+                    playBeep(600, 'sine', 0.15);
+                    terminalOutput.textContent += `Beep!\n\n`;
+                    break;
+                case 'about':
+                    terminalOutput.textContent += `RetroOS Aero Web Edition\nKernel Version 7.0.2007\nMemory: 32,768 KB RAM\n\n`;
+                    break;
+                default:
+                    terminalOutput.textContent += `'${mainCmd}' is not recognized as an internal or external command.\n\n`;
+            }
+        }
+
+        let paintCanvas, paintCtx, isDrawing=false, currentColor='#000000', bgColor='#ffffff', currentTool='pencil', currentSize=2, paintStart=null, paintSnap=null, paintUndo=[], paintBtn=0, paintReady=false;
+const paletteColors=['#000000','#808080','#800000','#808000','#008000','#008080','#000080','#800080','#808040','#004040','#0080ff','#004080','#4000ff','#804000','#ffffff','#c0c0c0','#ff0000','#ffff00','#00ff00','#00ffff','#0000ff','#ff00ff','#ffff80','#00ff80','#80ffff','#8080ff','#ff0080','#ff8040'];
+const paintTools=[['eraser','🧽','Eraser/Color Eraser'],['fill','🪣','Fill With Color'],['picker','💉','Pick Color'],['pencil','✏️','Pencil'],['brush','🖌️','Brush'],['spray','💨','Airbrush'],['line','╱','Line'],['rect','▭','Rectangle'],['frect','■','Filled Rectangle'],['ellipse','◯','Ellipse'],['fellipse','⬤','Filled Ellipse']];
+function initPaintCanvas(){
+  if(paintReady) return; paintReady=true;
+  paintCanvas=document.getElementById('paint-canvas'); paintCtx=paintCanvas.getContext('2d',{willReadFrequently:true});
+  paintCtx.fillStyle='#fff'; paintCtx.fillRect(0,0,paintCanvas.width,paintCanvas.height);
+  const tools=document.getElementById('paint-tools');
+  paintTools.forEach(([id,ic,tt])=>{const b=document.createElement('button');b.id='tool-'+id;b.title=tt;b.textContent=ic;b.className='btn-retro w-7 h-7 text-sm leading-none flex items-center justify-center'+(id==='pencil'?' active':'');b.onclick=()=>setPaintTool(id);b.onmouseenter=()=>document.getElementById('paint-hint').textContent=tt;tools.appendChild(b);});
+  const sz=document.getElementById('paint-sizes');
+  [1,2,4,6].forEach(s=>{const b=document.createElement('div');b.className='w-10 h-3 flex items-center cursor-pointer paint-size';b.dataset.s=s;b.innerHTML=`<div class="w-full bg-black" style="height:${s}px"></div>`;b.onclick=()=>setPaintSize(s);sz.appendChild(b);});
+  setPaintSize(2);
+  const pal=document.getElementById('palette');
+  paletteColors.forEach(c=>{const d=document.createElement('div');d.className='w-4 h-4 win-inset cursor-pointer';d.style.background=c;d.onclick=()=>setPaintColor(c,false);d.oncontextmenu=e=>{e.preventDefault();setPaintColor(c,true);};pal.appendChild(d);});
+  paintCanvas.addEventListener('pointerdown',pDown);paintCanvas.addEventListener('pointermove',pMove);
+  paintCanvas.addEventListener('pointerup',pUp);paintCanvas.addEventListener('pointercancel',pUp);
+  paintCanvas.addEventListener('contextmenu',e=>e.preventDefault());
+}
+function setPaintColor(c,bg){if(bg){bgColor=c;document.getElementById('paint-bg-box').style.background=c;}else{currentColor=c;document.getElementById('current-color-indicator').style.background=c;}}
+function pPos(e){const r=paintCanvas.getBoundingClientRect();return [Math.floor(e.clientX-r.left),Math.floor(e.clientY-r.top)];}
+function pPush(){paintUndo.push(paintCtx.getImageData(0,0,paintCanvas.width,paintCanvas.height));if(paintUndo.length>20)paintUndo.shift();}
+function pDown(e){
+  paintBtn=e.button; const [x,y]=pPos(e); const col=paintBtn===2?bgColor:currentColor;
+  pPush(); paintCanvas.setPointerCapture(e.pointerId);
+  if(currentTool==='fill'){floodFill(x,y,col);return;}
+  if(currentTool==='picker'){const d=paintCtx.getImageData(x,y,1,1).data;setPaintColor('#'+[d[0],d[1],d[2]].map(v=>v.toString(16).padStart(2,'0')).join(''),paintBtn===2);setPaintTool('pencil');return;}
+  isDrawing=true; paintStart=[x,y]; paintSnap=paintCtx.getImageData(0,0,paintCanvas.width,paintCanvas.height);
+  paintCtx.lineCap=paintCtx.lineJoin='round';
+  if(['pencil','brush','eraser'].includes(currentTool)){pStroke(x-0.01,y,x,y,col);}
+  if(currentTool==='spray')pSpray(x,y,col);
+}
+function pStroke(x0,y0,x1,y1,col){paintCtx.strokeStyle=col;paintCtx.lineCap=currentTool==='eraser'?'butt':'round';paintCtx.lineWidth=currentTool==='pencil'?1:currentTool==='eraser'?currentSize*3+4:currentSize*2+1;paintCtx.beginPath();paintCtx.moveTo(x0,y0);paintCtx.lineTo(x1,y1);paintCtx.stroke();}
+function pSpray(x,y,col){paintCtx.fillStyle=col;for(let i=0;i<14;i++){const a=Math.random()*6.28,r=Math.random()*(currentSize*3+4);paintCtx.fillRect(Math.round(x+Math.cos(a)*r),Math.round(y+Math.sin(a)*r),1,1);}}
+function pMove(e){
+  const [x,y]=pPos(e); document.getElementById('paint-pos').textContent=x+','+y;
+  if(!isDrawing)return; const col=paintBtn===2?bgColor:currentColor, t=currentTool, [sx,sy]=paintStart;
+  if(['pencil','brush'].includes(t)){pStroke(sx,sy,x,y,col);paintStart=[x,y];}
+  else if(t==='eraser'){pStroke(sx,sy,x,y,bgColor);paintStart=[x,y];}
+  else if(t==='spray')pSpray(x,y,col);
+  else{paintCtx.putImageData(paintSnap,0,0);paintCtx.strokeStyle=paintCtx.fillStyle=col;paintCtx.lineWidth=currentSize;paintCtx.beginPath();
+    if(t==='line'){paintCtx.moveTo(sx,sy);paintCtx.lineTo(x,y);paintCtx.stroke();}
+    else if(t==='rect'||t==='frect'){paintCtx.rect(sx,sy,x-sx,y-sy);t==='frect'?paintCtx.fill():paintCtx.stroke();}
+    else{paintCtx.ellipse((sx+x)/2,(sy+y)/2,Math.abs(x-sx)/2||0.5,Math.abs(y-sy)/2||0.5,0,0,6.283);t==='fellipse'?paintCtx.fill():paintCtx.stroke();}}
+}
+function pUp(){isDrawing=false;}
+function floodFill(sx,sy,hex){
+  const w=paintCanvas.width,h=paintCanvas.height,img=paintCtx.getImageData(0,0,w,h),d=img.data,t=(sy*w+sx)*4,tr=d[t],tg=d[t+1],tb=d[t+2],n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;
+  if(tr===r&&tg===g&&tb===b)return; const st=[[sx,sy]];
+  while(st.length){const [x,y]=st.pop();if(x<0||y<0||x>=w||y>=h)continue;const i=(y*w+x)*4;if(d[i]!==tr||d[i+1]!==tg||d[i+2]!==tb)continue;d[i]=r;d[i+1]=g;d[i+2]=b;d[i+3]=255;st.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);}
+  paintCtx.putImageData(img,0,0);
+}
+function setPaintTool(tool){currentTool=tool;document.querySelectorAll('#paint-tools button').forEach(b=>b.classList.toggle('active',b.id==='tool-'+tool));playClickSound();}
+function setPaintSize(s){currentSize=parseInt(s,10);document.querySelectorAll('.paint-size').forEach(b=>b.style.background=b.dataset.s==s?'#2b9be8':'');document.querySelectorAll('.paint-size div').forEach(d=>d.style.background=d.parentElement.dataset.s==currentSize?'#fff':'#000');}
+function paintUndoStep(){const s=paintUndo.pop();if(s)paintCtx.putImageData(s,0,0);}
+function clearPaintCanvas(){if(!paintCtx)return;pPush();paintCtx.fillStyle='#fff';paintCtx.fillRect(0,0,paintCanvas.width,paintCanvas.height);playClickSound();}
+function paintNew(){clearPaintCanvas();paintUndo=[];}
+function paintInvert(){pPush();const i=paintCtx.getImageData(0,0,paintCanvas.width,paintCanvas.height),d=i.data;for(let k=0;k<d.length;k+=4){d[k]=255-d[k];d[k+1]=255-d[k+1];d[k+2]=255-d[k+2];}paintCtx.putImageData(i,0,0);}
+function downloadPaintCanvas(){if(!paintCanvas)return;const a=document.createElement('a');a.download='untitled.png';a.href=paintCanvas.toDataURL();a.click();}
+
+const rv={h:[],i:-1,cur:null};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const rvLogo=(px)=>[...'Retroville'].map((c,i)=>`<span style="color:${['#3366cc','#cc0000','#ffcc00','#3366cc','#009933','#cc0000'][i%6]}">${c}</span>`).join('')+`<span style="color:#cc0000">!</span>`;
+const rvLogoCss=px=>`font:bold ${px}px Georgia,'Times New Roman',serif;letter-spacing:-1px`;
+const rvSet=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};
+function rvGo(input){
+  input=(input||'').trim(); if(!input)return;
+  if(/^(retroville(\.com)?|retroville:\/\/home)\/?$/i.test(input))return rvShow({t:'home'});
+  if(/^https?:\/\/\S+$/i.test(input))return rvShow({t:'url',u:input});
+  if(/^[^\s\/]+\.[a-z]{2,}(\/\S*)?$/i.test(input))return rvShow({t:'url',u:'https://'+input});
+  rvShow({t:'search',q:input,off:0});
+}
+function rvShow(e,push=true){
+  if(push){rv.h=rv.h.slice(0,rv.i+1);rv.h.push(e);rv.i=rv.h.length-1;} rv.cur=e;
+  const c=document.getElementById('rv-content'),a=document.getElementById('rv-addr'); c.scrollTop=0;
+  const done=()=>{rvSet('rv-status','Done');rvSet('rv-globe','🌐');};
+  rvSet('rv-status','Opening page...');rvSet('rv-globe','🌎');
+  if(e.t==='home'){a.value='http://www.retroville.com/';c.innerHTML=`<div style="text-align:center;padding-top:36px;min-height:100%;box-sizing:border-box;background:linear-gradient(#a9dcff,#e9f7ff 45%,#fff 70%)"><div style="${rvLogoCss(68)}">${rvLogo()}</div><div style="font-size:12px;margin:4px 0 18px;color:#555">Search the web using Retroville</div><input id="rv-q" style="width:70%;max-width:380px;border:2px inset #999;padding:3px;font-size:14px" onkeydown="if(event.key==='Enter')rvGo(this.value)"><br><br><button class="btn-retro" style="padding:3px 10px;font-size:12px" onclick="rvGo(document.getElementById('rv-q').value)">Retroville Search</button> <button class="btn-retro" style="padding:3px 10px;font-size:12px" onclick="rvLucky(document.getElementById('rv-q').value)">I'm Feeling Lucky</button><div style="font-size:12px;margin-top:28px"><a href="#" style="color:#00c" onclick="rvShow({t:'fav'});return false">Favorites</a> - <a href="#" style="color:#00c" onclick="rvGo('en.wikipedia.org');return false">Wikipedia</a> - <a href="#" style="color:#00c" onclick="rvGo('web.archive.org');return false">Wayback Machine</a></div><div style="font-size:10px;color:#555;margin-top:30px">&copy;2007 Retroville Inc.<br>Best viewed with Retroville Browser 1.0 at 1024x768</div></div>`;done();setTimeout(()=>document.getElementById('rv-q')?.focus(),50);}
+  else if(e.t==='fav'){a.value='retroville://favorites';c.innerHTML=`<div style="padding:16px;font-size:13px"><h2 style="font:bold 20px Georgia">&#9733; Favorites</h2><hr><ul style="line-height:2;list-style:square;padding-left:22px">${[['Retroville Home','retroville.com'],['Wikipedia','https://en.wikipedia.org/wiki/Main_Page'],['Wayback Machine','https://web.archive.org'],['Example.com','https://example.com'],['OpenStreetMap','https://www.openstreetmap.org']].map(([n,u])=>`<li><a href="#" style="color:#00c" onclick="rvGo('${u}');return false">${n}</a></li>`).join('')}</ul></div>`;done();}
+  else if(e.t==='url'){a.value=e.u;rvLoadUrl(e,c,done);}
+  else if(e.t==='search'){a.value='http://www.retroville.com/search?q='+encodeURIComponent(e.q);rvSearch(e,c,done);}
+}
+async function rvSearch(e,c,done){
+  const t0=performance.now(),head=`<table style="width:100%;border-collapse:collapse"><tr><td style="padding:6px 10px;white-space:nowrap"><a href="#" onclick="rvShow({t:'home'});return false" style="${rvLogoCss(30)};text-decoration:none">${rvLogo()}</a></td><td style="padding:6px"><input id="rv-q2" value="${esc(e.q)}" style="width:50%;border:2px inset #999;padding:2px;font-size:13px" onkeydown="if(event.key==='Enter')rvGo(this.value)"> <button class="btn-retro" style="padding:2px 8px;font-size:12px" onclick="rvGo(document.getElementById('rv-q2').value)">Retroville Search</button></td></tr></table>`;
+  c.innerHTML=head+'<p style="padding:10px">Searching...</p>';
+  try{
+    const r=await fetch('https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=10&sroffset='+e.off+'&srsearch='+encodeURIComponent(e.q));
+    const j=await r.json(),res=j.query.search,tot=j.query.searchinfo.totalhits,secs=((performance.now()-t0)/1000).toFixed(2);
+    if(rv.cur!==e)return;
+    c.innerHTML=head+`<div style="background:#d9e1f9;border-top:1px solid #36c;padding:2px 10px;font-size:12px;display:flex;justify-content:space-between"><span>Searched the web for <b>${esc(e.q)}</b>.</span><span>Results <b>${e.off+1} - ${e.off+res.length}</b> of about <b>${tot.toLocaleString()}</b>. Search took <b>${secs}</b> seconds.</span></div><div style="padding:8px 14px">`+(res.length?res.map(x=>{const u='https://en.wikipedia.org/wiki/'+encodeURIComponent(x.title.replace(/ /g,'_'));return `<div style="margin:0 0 14px;max-width:560px"><a href="#" style="color:#00c;font-weight:bold;font-size:14px" onclick="rvGo('${u}');return false">${esc(x.title)}</a><div style="font-size:12px">${x.snippet.replace(/<span class="searchmatch">/g,'<b>').replace(/<\/span>/g,'</b>')}...</div><div style="font-size:11px;color:#080">en.wikipedia.org/wiki/${esc(x.title.replace(/ /g,'_'))} - ${Math.round(x.size/1024)}k - <u>Cached</u> - <u>Similar pages</u></div></div>`}).join(''):'<p>Your search did not match any documents.</p>')+`<div style="text-align:center;font-size:13px;margin:10px 0">Result Page: ${e.off>0?`<a href="#" style="color:#00c" onclick="rvShow({t:'search',q:'${esc(e.q).replace(/'/g,"\\'")}',off:${e.off-10}});return false">Previous</a> `:''}<b>${e.off/10+1}</b>${res.length==10?` <a href="#" style="color:#00c" onclick="rvShow({t:'search',q:'${esc(e.q).replace(/'/g,"\\'")}',off:${e.off+10}});return false">Next</a>`:''}</div><div style="text-align:center;font-size:10px;color:#555">&copy;2007 Retroville Inc.</div></div>`;
+  }catch(err){c.innerHTML=head+'<p style="padding:14px;color:#c00"><b>Cannot find server or DNS Error</b><br>Retroville could not reach the web. Check your internet connection and try again.</p>';}
+  done();
+}
+async function rvLucky(q){q=(q||'').trim();if(!q)return;try{const j=await (await fetch('https://en.wikipedia.org/w/api.php?action=query&list=search&format=json&origin=*&srlimit=1&srsearch='+encodeURIComponent(q))).json();const t=j.query.search[0].title;rvGo('https://en.wikipedia.org/wiki/'+encodeURIComponent(t.replace(/ /g,'_')));}catch(e){rvGo(q);}}
+const rvBar=m=>`<div style="background:#ffffcc;border-bottom:1px solid #999;font-size:11px;padding:2px 6px;flex:none">${m}</div>`;
+const rvWrap=h=>`<div style="display:flex;flex-direction:column;height:100%">${h}</div>`;
+const rvNew=u=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="color:#00c">Open in a new window</a>`;
+function rvYT(u){try{const x=new URL(u),h=x.hostname.replace(/^(www|m)\./,'');let id='';if(h==='youtu.be')id=x.pathname.slice(1);else if(h==='youtube.com')id=x.searchParams.get('v')||((x.pathname.match(/^\/(shorts|embed|live)\/([\w-]{11})/)||[])[2])||'';return /^[\w-]{11}$/.test(id)?id:'';}catch(_){return '';}}
+function rvDirect(u){const c=document.getElementById('rv-content');c.innerHTML=rvWrap(rvBar('Direct view. Blank? The site blocks embedding. '+rvNew(u))+`<iframe src="${esc(u)}" style="flex:1;border:0;width:100%;background:#fff"></iframe>`);}
+function rvError(c,u,why){c.innerHTML=`<div style="padding:24px;max-width:560px;font-size:13px"><h2 style="font:bold 18px Arial;color:#000">The page cannot be displayed</h2><hr><p>${why}</p><p>Please try the following:</p><ul style="list-style:square;padding-left:22px;line-height:1.7"><li>${rvNew(u)} (your real browser)</li><li><a href="#" style="color:#00c" onclick="rvDirect('${esc(u)}');return false">Try loading the page directly</a></li><li>Click the <b>Refresh</b> button, or try again later.</li><li><a href="#" style="color:#00c" onclick="rvShow({t:'home'});return false">Go back to Retroville Search</a></li></ul><p style="font-size:11px;color:#555">Retroville Browser 1.0</p></div>`;}
+const rvNoGo=/(^|\.)(instagram|facebook|twitter|x|tiktok|whatsapp|netflix|linkedin|reddit)\.com$|(^|\.)youtube\.com$/;
+async function rvLoadUrl(e,c,done){
+  const u=e.u;let host='';try{host=new URL(u).hostname.replace(/^www\./,'');}catch(_){return rvError(c,u,'The address is not valid.'),done();}
+  const yt=rvYT(u);
+  if(yt){c.innerHTML=rvWrap(rvBar('Playing video through the embedded player.')+`<iframe src="https://www.youtube.com/embed/${yt}?autoplay=1" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="flex:1;border:0;width:100%;background:#000"></iframe>`);return done();}
+  if(rvNoGo.test(host)){rvError(c,u,`<b>${esc(host)}</b> is a login-based web app that forbids being shown inside other pages, so no browser built into a web page can display it.`+(/youtube/.test(host)?' Tip: paste a YouTube <b>video link</b> into the address bar and it will play right here.':''));return done();}
+  c.innerHTML='<p style="padding:14px;font-size:13px">Connecting to '+esc(host)+'...</p>';
+  const proxies=[x=>'https://corsproxy.io/?url='+encodeURIComponent(x),x=>'https://api.allorigins.win/raw?url='+encodeURIComponent(x)];
+  let html=null;
+  for(const px of proxies){try{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),10000),r=await fetch(px(u),{signal:ctl.signal});clearTimeout(tm);if(!r.ok)continue;const tx=await r.text();if(tx.length>100&&/<(html|body|head|div|p)\b/i.test(tx)){html=tx;break;}}catch(_){}}
+  if(rv.cur!==e)return;
+  if(!html){rvError(c,u,'Retroville could not reach <b>'+esc(host)+'</b>. The site may be down, or it may block outside access.');return done();}
+  html=html.replace(/<meta[^>]+http-equiv=["']?(content-security-policy|x-frame-options|refresh)[^>]*>/gi,'');
+  const inj=`<base href="${esc(u)}"><script>addEventListener('click',function(v){var a=v.target.closest&&v.target.closest('a[href]');if(!a)return;var h=a.getAttribute('href');if(!h||h[0]==='#'||/^javascript:/i.test(h))return;v.preventDefault();parent.postMessage({rv:a.href},'*');},true);addEventListener('submit',function(v){v.preventDefault();var f=v.target;if((f.method||'get').toLowerCase()!=='get')return;var b=new URL(f.getAttribute('action')||'',document.baseURI);new FormData(f).forEach(function(x,k){if(typeof x==='string')b.searchParams.set(k,x);});parent.postMessage({rv:b.href},'*');},true);<\/script>`;
+  html=/<head[^>]*>/i.test(html)?html.replace(/<head[^>]*>/i,m=>m+inj):inj+html;
+  c.innerHTML=rvWrap(rvBar('Viewing through the Retroville proxy. Complex sites may look different. '+rvNew(u)));
+  const f=document.createElement('iframe');f.style.cssText='flex:1;border:0;width:100%;background:#fff';f.setAttribute('sandbox','allow-scripts allow-forms allow-popups');f.srcdoc=html;c.firstChild.appendChild(f);done();
+}
+addEventListener('message',ev=>{if(ev.data&&typeof ev.data.rv==='string'&&/^https?:/i.test(ev.data.rv))rvGo(ev.data.rv);});
+function rvBack(){if(rv.i>0){rv.i--;rvShow(rv.h[rv.i],false);}}
+function rvFwd(){if(rv.i<rv.h.length-1){rv.i++;rvShow(rv.h[rv.i],false);}}
+function rvReload(){if(rv.cur)rvShow(rv.cur,false);}
+function rvStop(){rvSet('rv-status','Done');rvSet('rv-globe','🌐');}
+
+        const rows = 9, cols = 9, minesCount = 10;
+        let board = [], revealedCount = 0, flagsCount = 0;
+        let gameOver = false, gameTimer = 0, timerInterval = null;
+        let flagMode = false; // Flag mode toggle for mobile touch users
+        let minesweeperInitialized = false;
+
+        function initMinesweeper() {
+            minesweeperInitialized = true;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            gameTimer = 0;
+            gameOver = false;
+            revealedCount = 0;
+            flagsCount = 0;
+
+            document.getElementById('mine-timer-display').textContent = '000';
+            document.getElementById('mine-count-display').textContent = String(minesCount).padStart(3, '0');
+            document.getElementById('minesweeper-face').textContent = '🙂';
+
+            board = [];
+            const grid = document.getElementById('minesweeper-grid');
+            grid.innerHTML = '';
+
+            // Build board state
+            for (let r = 0; r < rows; r++) {
+                board[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    board[r][c] = { mine: false, revealed: false, flagged: false, count: 0 };
+                }
+            }
+
+            // Place Mines
+            let placed = 0;
+            while (placed < minesCount) {
+                let r = Math.floor(Math.random() * rows);
+                let c = Math.floor(Math.random() * cols);
+                if (!board[r][c].mine) {
+                    board[r][c].mine = true;
+                    placed++;
+                }
+            }
+
+            // Calculate Numbers
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (!board[r][c].mine) {
+                        let cnt = 0;
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                let nr = r + dr, nc = c + dc;
+                                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && board[nr][nc].mine) cnt++;
+                            }
+                        }
+                        board[r][c].count = cnt;
+                    }
+                }
+            }
+
+            // Render Cells
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-6 h-6 btn-retro text-xs font-bold flex items-center justify-center leading-none p-0';
+                    btn.dataset.r = r;
+                    btn.dataset.c = c;
+                    btn.onclick = () => clickCell(r, c);
+                    btn.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        toggleFlag(r, c);
+                    };
+                    grid.appendChild(btn);
+                }
+            }
+        }
+
+        function startMineTimer() {
+            if (!timerInterval) {
+                timerInterval = setInterval(() => {
+                    gameTimer++;
+                    document.getElementById('mine-timer-display').textContent = String(Math.min(999, gameTimer)).padStart(3, '0');
+                }, 1000);
+            }
+        }
+
+        function toggleFlagMode() {
+            flagMode = !flagMode;
+            const btn = document.getElementById('flag-mode-btn');
+            btn.textContent = flagMode ? '🚩 Mode: Flag' : '🚩 Mode: Dig';
+            playClickSound();
+        }
+
+        function toggleFlag(r, c) {
+            if (gameOver || board[r][c].revealed) return;
+            const cell = board[r][c];
+            cell.flagged = !cell.flagged;
+            flagsCount += cell.flagged ? 1 : -1;
+            document.getElementById('mine-count-display').textContent = String(Math.max(0, minesCount - flagsCount)).padStart(3, '0');
+
+            const btn = getCellButton(r, c);
+            btn.textContent = cell.flagged ? '🚩' : '';
+            playClickSound();
+        }
+
+        function clickCell(r, c) {
+            if (gameOver) return;
+            startMineTimer();
+
+            if (flagMode) {
+                toggleFlag(r, c);
+                return;
+            }
+
+            const cell = board[r][c];
+            if (cell.flagged || cell.revealed) return;
+
+            if (cell.mine) {
+                // GAME OVER
+                gameOver = true;
+                clearInterval(timerInterval);
+                document.getElementById('minesweeper-face').textContent = '😵';
+                playExplodeSound();
+                revealAllMines();
+                return;
+            }
+
+            // Reveal Tile
+            revealCell(r, c);
+            playClickSound();
+
+            if (revealedCount === (rows * cols - minesCount)) {
+                // WIN!
+                gameOver = true;
+                clearInterval(timerInterval);
+                document.getElementById('minesweeper-face').textContent = '😎';
+                playBeep(880, 'sine', 0.2);
+            }
+        }
+
+        function revealCell(r, c) {
+            if (r < 0 || r >= rows || c < 0 || c >= cols) return;
+            const cell = board[r][c];
+            if (cell.revealed || cell.flagged) return;
+
+            cell.revealed = true;
+            revealedCount++;
+            const btn = getCellButton(r, c);
+            btn.classList.remove('btn-retro');
+            btn.classList.add('win-inset', 'bg-gray-300');
+
+            if (cell.count > 0) {
+                btn.textContent = cell.count;
+                const colors = ['', 'text-blue-700', 'text-green-700', 'text-red-700', 'text-purple-800', 'text-amber-800', 'text-teal-700', 'text-black', 'text-gray-600'];
+                btn.classList.add(colors[cell.count] || 'text-black');
+            } else {
+                // Auto Expand Adjacent Zeros
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr !== 0 || dc !== 0) revealCell(r + dr, c + dc);
+                    }
+                }
+            }
+        }
+
+        function revealAllMines() {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (board[r][c].mine) {
+                        const btn = getCellButton(r, c);
+                        btn.textContent = '💣';
+                        btn.classList.add('bg-red-400');
+                    }
+                }
+            }
+        }
+
+        function getCellButton(r, c) {
+            return document.querySelector(`#minesweeper-grid button[data-r="${r}"][data-c="${c}"]`);
+        }
+
+        let calcVal = '0';
+        let calcOpState = null;
+        let calcPrevVal = null;
+        let calcReset = false;
+
+        function updateCalcDisplay() {
+            document.getElementById('calc-display').textContent = calcVal;
+        }
+
+        function calcNum(num) {
+            playClickSound();
+            if (calcVal === '0' || calcReset) {
+                calcVal = num === '.' ? '0.' : num;
+                calcReset = false;
+            } else {
+                if (num === '.' && calcVal.includes('.')) return;
+                calcVal += num;
+            }
+            updateCalcDisplay();
+        }
+
+        function calcOp(op) {
+            playClickSound();
+            if (op === 'sqrt') {
+                calcVal = String(Math.sqrt(parseFloat(calcVal)));
+                updateCalcDisplay();
+                return;
+            }
+            calcPrevVal = parseFloat(calcVal);
+            calcOpState = op;
+            calcReset = true;
+        }
+
+        function calcEquals() {
+            playClickSound();
+            if (calcOpState && calcPrevVal !== null) {
+                const current = parseFloat(calcVal);
+                let res = 0;
+                switch (calcOpState) {
+                    case '+': res = calcPrevVal + current; break;
+                    case '-': res = calcPrevVal - current; break;
+                    case '*': res = calcPrevVal * current; break;
+                    case '/': res = current !== 0 ? calcPrevVal / current : 'Error'; break;
+                }
+                calcVal = String(res);
+                calcOpState = null;
+                calcReset = true;
+                updateCalcDisplay();
+            }
+        }
+
+        function calcClear() {
+            playClickSound();
+            calcVal = '0';
+            calcOpState = null;
+            calcPrevVal = null;
+            updateCalcDisplay();
+        }
+
+        function calcCE() {
+            playClickSound();
+            calcVal = '0';
+            updateCalcDisplay();
+        }
+
+        function calcToggleSign() {
+            playClickSound();
+            calcVal = String(parseFloat(calcVal) * -1);
+            updateCalcDisplay();
+        }
+
+        function changeWallpaper(theme) {
+            playClickSound();
+            const body = document.getElementById('desktop-body');
+            body.className = body.className.replace(/wp-\w+/g, '') + ' ' + theme;
+        }
+
+        function toggleCRT(enabled) {
+            playClickSound();
+            const body = document.getElementById('desktop-body');
+            const ind = document.getElementById('crt-indicator');
+            if (enabled) {
+                body.classList.add('crt-screen');
+                ind.style.transform = 'translateX(1rem)';
+                ind.classList.replace('bg-gray-500', 'bg-green-600');
+            } else {
+                body.classList.remove('crt-screen');
+                ind.style.transform = 'translateX(0rem)';
+                ind.classList.replace('bg-green-600', 'bg-gray-500');
+            }
+        }
+
+        // System Stats Simulator
+        let startTime = Date.now();
+        setInterval(() => {
+            // CPU Fluctuation
+            const cpu = Math.floor(8 + Math.random() * 30);
+            document.getElementById('cpu-usage-text').textContent = `${cpu}%`;
+            document.getElementById('cpu-bar').style.width = `${cpu}%`;
+
+            // RAM Fluctuation
+            const ram = (12 + Math.random() * 4).toFixed(1);
+            document.getElementById('ram-usage-text').textContent = `${ram} MB / 32 MB`;
+            document.getElementById('ram-bar').style.width = `${(ram / 32) * 100}%`;
+
+            // Uptime Counter
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const hrs = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+            const secs = String(elapsed % 60).padStart(2, '0');
+            document.getElementById('system-uptime').textContent = `${hrs}:${mins}:${secs}`;
+        }, 2000);
+
+        function toggleStartMenu() {
+            playClickSound();
+            const menu = document.getElementById('start-menu');
+            menu.classList.toggle('hidden');
+            menu.classList.toggle('flex');
+        }
+
+        function closeStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.classList.add('hidden');
+            menu.classList.remove('flex');
+        }
+
+        function showShutdownDialog() {
+            playClickSound();
+            document.getElementById('shutdown-modal').classList.remove('hidden');
+        }
+
+        function hideShutdownDialog() {
+            playClickSound();
+            document.getElementById('shutdown-modal').classList.add('hidden');
+        }
+
+        function showAboutDialog() {
+            playClickSound();
+            document.getElementById('about-modal').classList.remove('hidden');
+        }
+
+        function hideAboutDialog() {
+            playClickSound();
+            document.getElementById('about-modal').classList.add('hidden');
+        }
+
+        function simulatePowerOff() {
+            try { musicShutdown(); } catch (e) {}
+            playBeep(200, 'sawtooth', 0.5);
+            document.body.innerHTML = `
+                <div class="h-full w-full bg-black flex flex-col items-center justify-center text-orange-500 font-mono p-6 text-center select-none">
+                    <p class="text-xl mb-4 font-bold">It is now safe to turn off your computer.</p>
+                    <button onclick="location.reload()" class="mt-4 px-4 py-2 border border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black font-bold text-sm">
+                        Restart RetroOS
+                    </button>
+                </div>
+            `;
+        }
+
+        // Live Clock
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            document.getElementById('system-clock').textContent = `${hours}:${minutes} ${ampm}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Global Desktop Click to close start menu
+        document.getElementById('desktop').addEventListener('click', (e) => {
+            if (e.target.id === 'desktop') closeStartMenu();
+        });
+
+        // Keybindings for Calculator
+        document.addEventListener('keydown', (e) => {
+            const calcWin = document.getElementById('win-calculator');
+            if (!calcWin.classList.contains('hidden') && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                if (e.key >= '0' && e.key <= '9') calcNum(e.key);
+                if (e.key === '.') calcNum('.');
+                if (['+', '-', '*', '/'].includes(e.key)) calcOp(e.key);
+                if (e.key === 'Enter' || e.key === '=') calcEquals();
+                if (e.key === 'Escape') calcClear();
+                if (e.key === 'Backspace') calcCE();
+            }
+        });
+
+        // ======================= Background music (YouTube playlist) =======================
+        const MUSIC = { listId: 'PLNoJ-jBBofgR_EJkFMaXmKCLm9TtdAYTw', startVideo: 'MY_B_4zMusU' };
+        let ytPlayer = null, ytReady = false;
+        let musicUserPaused = false, musicStarted = false, musicSeeking = false, musicCuedHandled = false;
+        let musicLastId = null, musicShownTitle = '', musicErrors = 0, musicHinted = false, musicNotify = true, musicTimer = null;
+        const $m = id => document.getElementById(id);
+        const musicFmt = s => { s = Math.max(0, Math.floor(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+        function musicStatus(t) { const e = $m('music-status'); if (e) e.textContent = t; }
+
+        function showToast(o) {
+            const stack = $m('toast-stack');
+            if (!stack) return;
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.setAttribute('role', 'status');
+            if (o.img) {
+                const im = document.createElement('img');
+                im.alt = '';
+                im.src = o.img;
+                im.onerror = () => im.remove();
+                t.appendChild(im);
+            } else {
+                const ic = document.createElement('div');
+                ic.textContent = o.icon || '🎵';
+                ic.style.cssText = 'font-size:26px;flex:none';
+                t.appendChild(ic);
+            }
+            const box = document.createElement('div');
+            box.style.minWidth = '0';
+            [['t-head', o.head], ['t-title', o.title], ['t-sub', o.sub]].forEach(([cls, txt]) => {
+                if (!txt) return;
+                const d = document.createElement('div');
+                d.className = cls;
+                d.textContent = txt;   // textContent: titles come from the web, never inject as HTML
+                box.appendChild(d);
+            });
+            t.appendChild(box);
+            const kill = () => { if (!t.parentNode) return; t.classList.add('out'); setTimeout(() => t.remove(), 260); };
+            t.onclick = () => { if (o.open) openApp('music'); kill(); };
+            stack.appendChild(t);
+            while (stack.children.length > 3) stack.firstChild.remove();
+            setTimeout(kill, o.ms || 6000);
+        }
+
+        function loadYT() {
+            if (window.YT && YT.Player) { musicInit(); return; }
+            window.onYouTubeIframeAPIReady = musicInit;
+            const s = document.createElement('script');
+            s.src = 'https://www.youtube.com/iframe_api';
+            s.onerror = () => musicStatus('Could not load the YouTube player. Check your internet connection.');
+            document.head.appendChild(s);
+        }
+
+        function musicInit() {
+            const vars = { autoplay: 0, controls: 0, disablekb: 1, playsinline: 1, rel: 0, modestbranding: 1, iv_load_policy: 3 };
+            if (/^https?:$/.test(location.protocol)) vars.origin = location.origin;
+            ytPlayer = new YT.Player('yt-player', {
+                width: '320', height: '180', playerVars: vars,
+                events: { onReady: musicOnReady, onStateChange: musicOnState, onError: musicOnError, onAutoplayBlocked: musicOnBlocked }
+            });
+        }
+
+        function musicSavedVol() {
+            try { const v = parseInt(localStorage.getItem('retroos_music_vol'), 10); if (v >= 0 && v <= 100) return v; } catch (e) {}
+            return 60;
+        }
+
+        function musicOnReady() {
+            ytReady = true;
+            ytPlayer.setVolume(musicSavedVol());
+            musicStatus('Loading playlist…');
+            // Cue first so we can find the track from the link, then start from it.
+            ytPlayer.cuePlaylist({ listType: 'playlist', list: MUSIC.listId });
+            setTimeout(() => { if (!musicCuedHandled) musicStartPlaylist(0); }, 5000);
+            musicArmGesture();
+            musicRender();
+        }
+
+        function musicStartPlaylist(idx) {
+            musicCuedHandled = true;
+            ytPlayer.loadPlaylist({ listType: 'playlist', list: MUSIC.listId, index: idx });
+            ytPlayer.setLoop(true);
+            musicStatus('Starting…');
+            setTimeout(musicCheckAutoplay, 2500);
+        }
+
+        function musicCheckAutoplay() {
+            if (!ytReady || musicUserPaused || musicStarted) return;
+            const s = ytPlayer.getPlayerState();
+            if (s !== 1 && s !== 3) musicOnBlocked();
+        }
+
+        function musicOnBlocked() {
+            if (musicHinted || musicStarted) return;
+            musicHinted = true;
+            musicStatus('Click anywhere to start the music (browsers block autoplay with sound).');
+            showToast({ icon: '🎵', head: 'Music', title: 'Click anywhere to start the music', sub: 'Your browser blocks autoplay with sound', ms: 8000, open: true });
+        }
+
+        // The first click/keypress anywhere starts playback if the browser blocked autoplay.
+        function musicArmGesture() {
+            const handler = e => {
+                if (e.target && e.target.closest && e.target.closest('#win-music, #tray-play')) return;
+                document.removeEventListener('pointerdown', handler, true);
+                document.removeEventListener('keydown', handler, true);
+                if (ytReady && !musicUserPaused) {
+                    const s = ytPlayer.getPlayerState();
+                    if (s !== 1 && s !== 3 && musicCuedHandled) ytPlayer.playVideo();
+                }
+            };
+            document.addEventListener('pointerdown', handler, true);
+            document.addEventListener('keydown', handler, true);
+        }
+
+        function musicOnState(e) {
+            const S = YT.PlayerState;
+            if (e.data === S.CUED && !musicCuedHandled) {
+                let idx = 0;
+                try { const i = (ytPlayer.getPlaylist() || []).indexOf(MUSIC.startVideo); if (i > 0) idx = i; } catch (_) {}
+                musicStartPlaylist(idx);
+            }
+            if (e.data === S.PLAYING) {
+                musicStarted = true; musicErrors = 0;
+                try { ytPlayer.setLoop(true); } catch (_) {}
+                musicStatus('Playing · repeat all');
+                musicTrackUpdate();
+            }
+            if (e.data === S.PAUSED) musicStatus('Paused');
+            if (e.data === S.BUFFERING) musicStatus('Buffering…');
+            if (e.data === S.ENDED) {
+                // Safety net: if the built-in playlist loop did not restart, go back to track 1.
+                setTimeout(() => { try { if (ytPlayer.getPlayerState() === S.ENDED) ytPlayer.playVideoAt(0); } catch (_) {} }, 1500);
+            }
+            musicRender();
+        }
+
+        function musicOnError(e) {
+            const code = e.data;
+            musicErrors++;
+            if (code === 152 || code === 153) {
+                const msg = 'YouTube refused to play inside this page (error ' + code + '). Open the file through a web address such as http://localhost or a web host instead of double-clicking it.';
+                musicStatus(msg);
+                showToast({ icon: '⚠️', head: 'Music', title: 'YouTube blocked playback', sub: 'Error ' + code + ': serve the page over http(s)', ms: 9000, open: true });
+                return;
+            }
+            const n = (ytPlayer.getPlaylist() || []).length || 1;
+            if (musicErrors <= n) {
+                musicStatus('This track is unavailable. Skipping…');
+                setTimeout(() => { try { ytPlayer.nextVideo(); } catch (_) {} }, 700);
+            } else {
+                musicStatus('No playable tracks were found in the playlist.');
+            }
+        }
+
+        function musicTrackUpdate() {
+            if (!ytReady) return;
+            const d = ytPlayer.getVideoData() || {};
+            if (!d.video_id || !d.title) return;           // title not known yet; the ticker retries
+            const id = d.video_id, title = d.title, artist = d.author || 'Unknown channel';
+            let idx = -1, tot = 0;
+            try { idx = ytPlayer.getPlaylistIndex(); tot = (ytPlayer.getPlaylist() || []).length; } catch (_) {}
+            musicShownTitle = title;
+            $m('music-title').textContent = title;
+            $m('music-artist').textContent = artist;
+            $m('music-track').textContent = '🔁 Repeat all' + (tot ? ' · Track ' + (idx + 1) + ' of ' + tot : '');
+            const img = $m('music-img');
+            if (/^[\w-]{11}$/.test(id)) {
+                img.onload = () => { img.style.display = 'block'; };
+                img.onerror = () => { img.style.display = 'none'; };
+                img.src = 'https://i.ytimg.com/vi/' + id + '/mqdefault.jpg';
+            }
+            if (id !== musicLastId) {
+                musicLastId = id;
+                if (musicNotify) {
+                    showToast({
+                        img: /^[\w-]{11}$/.test(id) ? 'https://i.ytimg.com/vi/' + id + '/default.jpg' : null,
+                        head: '♪ Now playing', title: title,
+                        sub: artist + (tot ? ' · Track ' + (idx + 1) + ' of ' + tot : ''), open: true
+                    });
+                    playBeep(880, 'sine', 0.12);
+                }
+            }
+        }
+
+        function musicRender() {
+            if (!ytReady || !ytPlayer) return;
+            let st = -1, muted = false, vol = 60;
+            try { st = ytPlayer.getPlayerState(); muted = ytPlayer.isMuted(); vol = ytPlayer.getVolume(); } catch (_) {}
+            const playing = (st === 1 || st === 3);
+            const pb = $m('music-play'); if (pb) pb.textContent = playing ? '⏸' : '▶';
+            const tp = $m('tray-play'); if (tp) { tp.textContent = playing ? '⏸' : '▶'; tp.title = playing ? 'Pause music' : 'Play music'; }
+            const art = $m('music-art'); if (art) art.classList.toggle('playing', st === 1);
+            const mb = $m('music-mute'); if (mb) mb.textContent = (muted || vol === 0) ? '🔇' : (vol < 40 ? '🔈' : '🔊');
+            const vs = $m('music-vol'); if (vs && document.activeElement !== vs) vs.value = vol;
+            const vl = $m('music-vol-label'); if (vl) vl.textContent = muted ? 'Muted' : vol + '%';
+        }
+
+        function musicTick() {
+            try {
+                const seek = $m('music-seek');
+                if (!ytReady || !seek) return;
+                const st = ytPlayer.getPlayerState();
+                const dur = ytPlayer.getDuration() || 0, cur = ytPlayer.getCurrentTime() || 0;
+                if (!musicSeeking) { seek.value = dur ? Math.round(cur / dur * 1000) : 0; $m('music-cur').textContent = musicFmt(cur); }
+                $m('music-dur').textContent = musicFmt(dur);
+                const d = ytPlayer.getVideoData();
+                if (d && d.title && (d.video_id !== musicLastId || d.title !== musicShownTitle) && (st === 1 || st === 2 || st === 3)) musicTrackUpdate();
+                musicRender();
+            } catch (e) {}
+        }
+
+        // ---- controls ----
+        function musicToggle() {
+            if (!ytReady) { musicStatus('Player is still loading…'); return; }
+            const s = ytPlayer.getPlayerState();
+            if (s === 1 || s === 3) { musicUserPaused = true; ytPlayer.pauseVideo(); }
+            else { musicUserPaused = false; musicHinted = true; ytPlayer.playVideo(); }
+            playClickSound();
+            setTimeout(musicRender, 120);
+        }
+        function musicNext() { if (ytReady) { musicUserPaused = false; ytPlayer.nextVideo(); } }
+        function musicPrev() { if (ytReady) { musicUserPaused = false; ytPlayer.previousVideo(); } }
+        function musicMute() {
+            if (!ytReady) return;
+            if (ytPlayer.isMuted()) { ytPlayer.unMute(); if (ytPlayer.getVolume() === 0) ytPlayer.setVolume(30); }
+            else ytPlayer.mute();
+            musicRender();
+        }
+        function musicSetVol(v) {
+            if (!ytReady) return;
+            v = Math.max(0, Math.min(100, Math.round(v)));
+            ytPlayer.setVolume(v);
+            if (v > 0 && ytPlayer.isMuted()) ytPlayer.unMute();
+            try { localStorage.setItem('retroos_music_vol', String(v)); } catch (e) {}
+            musicRender();
+        }
+        function musicVolStep(d) {
+            if (!ytReady) return;
+            musicSetVol((ytPlayer.isMuted() ? 0 : ytPlayer.getVolume()) + d);
+            playClickSound();
+        }
+        function musicShutdown() {
+            clearInterval(musicTimer);
+            if (ytPlayer && ytPlayer.destroy) ytPlayer.destroy();
+        }
+
+        (function musicSetup() {
+            const seek = $m('music-seek'), vol = $m('music-vol'), nt = $m('music-notify');
+            if (seek) {
+                seek.addEventListener('input', () => {
+                    musicSeeking = true;
+                    if (ytReady) $m('music-cur').textContent = musicFmt((ytPlayer.getDuration() || 0) * seek.value / 1000);
+                });
+                seek.addEventListener('change', () => {
+                    if (ytReady) ytPlayer.seekTo((ytPlayer.getDuration() || 0) * seek.value / 1000, true);
+                    musicSeeking = false;
+                });
+            }
+            if (vol) {
+                vol.value = musicSavedVol();
+                $m('music-vol-label').textContent = vol.value + '%';
+                vol.addEventListener('input', () => musicSetVol(+vol.value));
+            }
+            if (nt) nt.addEventListener('change', () => { musicNotify = nt.checked; });
+            musicTimer = setInterval(musicTick, 500);
+            loadYT();
+        })();
+
+        // Floating Frutiger Aero bubbles
+        (function () {
+            const layer = document.getElementById('bubble-layer');
+            if (!layer) return;
+            for (let i = 0; i < 16; i++) {
+                const b = document.createElement('span');
+                const s = 14 + Math.random() * 60;
+                b.className = 'bubble';
+                b.style.cssText = `width:${s}px;height:${s}px;left:${Math.random() * 100}%;--d:${14 + Math.random() * 18}s;--delay:${-Math.random() * 25}s;--sway:${Math.round(Math.random() * 80 - 40)}px`;
+                layer.appendChild(b);
+            }
+        })();
+
+        // Initialize default app on startup
+        window.onload = () => {
+            openApp('notepad');
+            notepadSample();
+        };
+    </script>
+</body>
+</html>
